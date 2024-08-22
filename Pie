@@ -1,47 +1,68 @@
-const CustomTooltip = ({ active, payload }) => {
-    const [currentItemIndex, setCurrentItemIndex] = useState(0);
-    const [hoveredSegment, setHoveredSegment] = useState(null);
+import React from "react";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
-    useEffect(() => {
-        if (hoveredSegment !== null) {
-            const items = hoveredSegment === 0 ? openData : closeData;
-            const interval = setInterval(() => {
-                setCurrentItemIndex((prevIndex) => (prevIndex + 1) % items.length);
-            }, 1000); // Adjust the interval for cycling speed
-            return () => clearInterval(interval);
-        }
-    }, [hoveredSegment, openData, closeData]);
+// Register the necessary components for Chart.js
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-    const chartOptions = {
-        plugins: {
-            tooltip: {
-                enabled: false, // Disable default tooltip
-                external: function (context) {
-                    const tooltipModel = context.tooltip;
-                    if (tooltipModel.opacity === 0) {
-                        setHoveredSegment(null); // Reset when tooltip is inactive
-                        return;
-                    }
+const PieChart = ({ instances }) => {
+  // Prepare data for the chart
+  const data = {
+    labels: instances.map(instance => instance.INSTANCE_NAME),
+    datasets: [
+      {
+        label: "Instance Status",
+        data: instances.map(() => 1), // Each instance gets an equal slice
+        backgroundColor: instances.map(instance => 
+          instance.STATUS === "OPEN" ? "green" : "red"
+        ),
+        borderColor: "#ffffff",
+        borderWidth: 1,
+      },
+    ],
+  };
 
-                    const dataIndex = tooltipModel.dataPoints[0].dataIndex;
-                    setHoveredSegment(dataIndex); // Set the hovered segment (0 for open, 1 for close)
-                },
-            },
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const instance = instances[context.dataIndex];
+            return `${instance.INSTANCE_NAME}: ${instance.STATUS}`;
+          },
         },
-    };
+      },
+    },
+  };
 
-    return (
-        <div>
-            <Doughnut data={data} options={chartOptions} />
-            {hoveredSegment !== null && (
-                <div style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
-                    <p>
-                        {hoveredSegment === 0
-                            ? openData[currentItemIndex]
-                            : closeData[currentItemIndex]}
-                    </p>
-                </div>
-            )}
-        </div>
-    );
-}
+  return (
+    <div>
+      <h2>Instances Status Pie Chart</h2>
+      <Pie data={data} options={options} />
+    </div>
+  );
+};
+
+// Example usage with dummy data
+const App = () => {
+  const instances = [
+    { INSTANCE_NUMBER: 1, INSTANCE_NAME: 'nposqa4', HOST_NAME: '10.119.11.217', STATUS: 'OPEN' },
+    { INSTANCE_NUMBER: 2, INSTANCE_NAME: 'nposqa5', HOST_NAME: '10.119.11.218', STATUS: 'CLOSED' },
+    { INSTANCE_NUMBER: 3, INSTANCE_NAME: 'nposqa6', HOST_NAME: '10.119.11.219', STATUS: 'OPEN' },
+    { INSTANCE_NUMBER: 4, INSTANCE_NAME: 'nposqa7', HOST_NAME: '10.119.11.220', STATUS: 'CLOSED' },
+    { INSTANCE_NUMBER: 5, INSTANCE_NAME: 'nposqa8', HOST_NAME: '10.119.11.221', STATUS: 'OPEN' },
+    { INSTANCE_NUMBER: 6, INSTANCE_NAME: 'nposqa9', HOST_NAME: '10.119.11.222', STATUS: 'CLOSED' },
+  ];
+
+  return (
+    <div>
+      <PieChart instances={instances} />
+    </div>
+  );
+};
+
+export default App;
