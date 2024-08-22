@@ -1,68 +1,25 @@
-import React from "react";
-import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
-// Register the necessary components for Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-const PieChart = ({ instances }) => {
-  // Prepare data for the chart
-  const data = {
-    labels: instances.map(instance => instance.INSTANCE_NAME),
-    datasets: [
-      {
-        label: "Instance Status",
-        data: instances.map(() => 1), // Each instance gets an equal slice
-        backgroundColor: instances.map(instance => 
-          instance.STATUS === "OPEN" ? "green" : "red"
-        ),
-        borderColor: "#ffffff",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            const instance = instances[context.dataIndex];
-            return `${instance.INSTANCE_NAME}: ${instance.STATUS}`;
-          },
+// Assume `db_pie` is the object from the first image
+const db_pie = {
+    metaData: [{ name: 'INSTANCE_NUMBER' }, { name: 'INSTANCE_NAME' }, { name: 'HOST_NAME' }, { name: 'STATUS' }],
+    rows: [
+        {
+            HOST_NAME: "10.119.11.217.ebiz.verizon.com",
+            INSTANCE_NAME: "nposqa4",
+            INSTANCE_NUMBER: 1,
+            STATUS: "OPEN"
         },
-      },
-    },
-  };
-
-  return (
-    <div>
-      <h2>Instances Status Pie Chart</h2>
-      <Pie data={data} options={options} />
-    </div>
-  );
+        // Add more rows as needed
+    ]
 };
 
-// Example usage with dummy data
-const App = () => {
-  const instances = [
-    { INSTANCE_NUMBER: 1, INSTANCE_NAME: 'nposqa4', HOST_NAME: '10.119.11.217', STATUS: 'OPEN' },
-    { INSTANCE_NUMBER: 2, INSTANCE_NAME: 'nposqa5', HOST_NAME: '10.119.11.218', STATUS: 'CLOSED' },
-    { INSTANCE_NUMBER: 3, INSTANCE_NAME: 'nposqa6', HOST_NAME: '10.119.11.219', STATUS: 'OPEN' },
-    { INSTANCE_NUMBER: 4, INSTANCE_NAME: 'nposqa7', HOST_NAME: '10.119.11.220', STATUS: 'CLOSED' },
-    { INSTANCE_NUMBER: 5, INSTANCE_NAME: 'nposqa8', HOST_NAME: '10.119.11.221', STATUS: 'OPEN' },
-    { INSTANCE_NUMBER: 6, INSTANCE_NAME: 'nposqa9', HOST_NAME: '10.119.11.222', STATUS: 'CLOSED' },
-  ];
+// Convert `db_pie` data to required format
+const instances = db_pie.rows.map((row, index) => ({
+    INSTANCE_NUMBER: row.INSTANCE_NUMBER || index + 1,  // Assign instance number dynamically if not provided
+    INSTANCE_NAME: row.INSTANCE_NAME,
+    HOST_NAME: row.HOST_NAME.split('.')[0],  // Strip domain to match the second image format
+    STATUS: row.STATUS
+}));
 
-  return (
-    <div>
-      <PieChart instances={instances} />
-    </div>
-  );
-};
-
-export default App;
+// Now `instances` will be in the format similar to the second image
+console.log(instances);
