@@ -1,0 +1,47 @@
+const CustomTooltip = ({ active, payload }) => {
+    const [currentItemIndex, setCurrentItemIndex] = useState(0);
+    const [hoveredSegment, setHoveredSegment] = useState(null);
+
+    useEffect(() => {
+        if (hoveredSegment !== null) {
+            const items = hoveredSegment === 0 ? openData : closeData;
+            const interval = setInterval(() => {
+                setCurrentItemIndex((prevIndex) => (prevIndex + 1) % items.length);
+            }, 1000); // Adjust the interval for cycling speed
+            return () => clearInterval(interval);
+        }
+    }, [hoveredSegment, openData, closeData]);
+
+    const chartOptions = {
+        plugins: {
+            tooltip: {
+                enabled: false, // Disable default tooltip
+                external: function (context) {
+                    const tooltipModel = context.tooltip;
+                    if (tooltipModel.opacity === 0) {
+                        setHoveredSegment(null); // Reset when tooltip is inactive
+                        return;
+                    }
+
+                    const dataIndex = tooltipModel.dataPoints[0].dataIndex;
+                    setHoveredSegment(dataIndex); // Set the hovered segment (0 for open, 1 for close)
+                },
+            },
+        },
+    };
+
+    return (
+        <div>
+            <Doughnut data={data} options={chartOptions} />
+            {hoveredSegment !== null && (
+                <div style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
+                    <p>
+                        {hoveredSegment === 0
+                            ? openData[currentItemIndex]
+                            : closeData[currentItemIndex]}
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+}
