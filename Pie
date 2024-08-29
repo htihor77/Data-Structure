@@ -1,3 +1,94 @@
+function StatusBarChart(data) {
+    // Data provided
+    const tablespaceData = [
+        {
+            tablespace_name: "POSDB_DATA1",
+            block_size_kb: 8,
+            tot_size_mb: 695344,
+            tot_used_mb: 622452,
+            tot_free_mb: 72892,
+            pct_used: 89.52
+        },
+        // Add more tablespaces as necessary
+    ];
+
+    // Convert MB to GB and prepare data for chart
+    const labels = [];
+    const totSizeGB = [];
+    const totUsedGB = [];
+    const totFreeGB = [];
+
+    tablespaceData.forEach(item => {
+        labels.push(item.tablespace_name);
+        totSizeGB.push(item.tot_size_mb / 1024);
+        totUsedGB.push(item.tot_used_mb / 1024);
+        totFreeGB.push(item.tot_free_mb / 1024);
+    });
+
+    // Create the chart
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Total Size (GB)',
+                    data: totSizeGB,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Used (GB)',
+                    data: totUsedGB,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Total Free (GB)',
+                    data: totFreeGB,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Size (GB)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Assume `db_pie` is the object from the first image
 const db_pie = {
