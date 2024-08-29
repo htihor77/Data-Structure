@@ -1,84 +1,88 @@
-function StatusBarChart(data) {
-    // Data provided
-    const tablespaceData = [
-        {
-            tablespace_name: "POSDB_DATA1",
-            block_size_kb: 8,
-            tot_size_mb: 695344,
-            tot_used_mb: 622452,
-            tot_free_mb: 72892,
-            pct_used: 89.52
-        },
-        // Add more tablespaces as necessary
-    ];
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
 
-    // Convert MB to GB and prepare data for chart
-    const labels = [];
-    const totSizeGB = [];
-    const totUsedGB = [];
-    const totFreeGB = [];
+export default function StatusBarChart({ data: inputData }) {
 
-    tablespaceData.forEach(item => {
-        labels.push(item.tablespace_name);
-        totSizeGB.push(item.tot_size_mb / 1024);
-        totUsedGB.push(item.tot_used_mb / 1024);
-        totFreeGB.push(item.tot_free_mb / 1024);
-    });
+    // Prepare data for the chart
+    const tablespaces = inputData.map((row, index) => ({
+        TABLESPACE_NAME: row.TABLESPACE_NAME,
+        TOT_SIZE_GB: (row.TOT_SIZE_MB / 1024).toFixed(2),   // Convert MB to GB and round to 2 decimals
+        TOT_USED_GB: (row.TOT_USED_MB / 1024).toFixed(2),
+        TOT_FREE_GB: (row.TOT_FREE_MB / 1024).toFixed(2),
+        PCT_USED: row.PCT_USED
+    }));
 
-    // Create the chart
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Total Size (GB)',
-                    data: totSizeGB,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Total Used (GB)',
-                    data: totUsedGB,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Total Free (GB)',
-                    data: totFreeGB,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true,
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Size (GB)'
+    if (!tablespaces || tablespaces.length === 0) {
+        return <div>No data available</div>;
+    }
+
+    console.log(tablespaces);
+
+    const data = {
+        labels: tablespaces.map(ts => `${ts.TABLESPACE_NAME}`),
+        datasets: [
+            {
+                label: 'Total Size (GB)',
+                data: tablespaces.map(ts => ts.TOT_SIZE_GB),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            },
+            {
+                label: 'Total Used (GB)',
+                data: tablespaces.map(ts => ts.TOT_USED_GB),
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+            },
+            {
+                label: 'Total Free (GB)',
+                data: tablespaces.map(ts => ts.TOT_FREE_GB),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            }
+        ]
+    };
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                alignContent: 'top'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        const tableSpace = tablespaces[context.dataIndex];
+                        return `${tableSpace.TABLESPACE_NAME} (Used: ${tableSpace.TOT_USED_GB} GB, Free: ${tableSpace.TOT_FREE_GB} GB)`;
                     }
                 }
             }
+        },
+        scales: {
+            x: {
+                stacked: true,
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Size (GB)'
+                }
+            }
         }
-    });
+    };
+
+    return (
+        <div style={{ width: '520px', height: '300px', alignContent: 'top' }}>
+            <Bar className="bar" data={data} options={options} />
+        </div>
+    );
 }
-
-
-
-
-
-
-
 
 
 
