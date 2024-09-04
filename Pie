@@ -1,3 +1,19 @@
+<div className="chart-container" style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', height: '500px' }}>
+  <div className="rohit">
+    <h3>DB Instance Details:</h3>
+    <StatusPieChart pie={instanceStatusData} />
+  </div>
+  <div className="rohit">
+    <h3>Tablespace Free And Used Analysis:</h3>
+    <StatusBarChart inputData={barchart} />
+  </div>
+</div>
+
+
+
+
+
+
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 
