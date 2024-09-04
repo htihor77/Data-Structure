@@ -1,3 +1,63 @@
+import React from 'react';
+
+const DatabaseDetailsTable = ({ dbDetails }) => {
+    return (
+        <div>
+            <h2>Database Details</h2>
+            <table border="1" cellPadding="10" cellSpacing="0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Database Role</th>
+                        <th>Version</th>
+                        <th>Log Mode</th>
+                        <th>Pluggable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {dbDetails.map((db, index) => (
+                        <tr key={index}>
+                            <td>{db.NAME}</td>
+                            <td>{db.DATABASE_ROLE}</td>
+                            <td>{db.VERSION}</td>
+                            <td>{db.LOG_MODE}</td>
+                            <td>{db.PLUGGABLE}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
+// Sample data, replace this with your actual dbDetails array
+const sampleDbDetails = [
+    {
+        NAME: "JIR2TPRD",
+        DATABASE_ROLE: "PRIMARY",
+        VERSION: "19.0.0.0.0",
+        LOG_MODE: "ARCHIVELOG",
+        PLUGGABLE: "YES"
+    }
+];
+
+export default function App() {
+    return (
+        <div className="App">
+            <DatabaseDetailsTable dbDetails={sampleDbDetails} />
+        </div>
+    );
+}
+
+
+
+
+
+
+
+
+
+
 <div className="chart-container" style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', height: '500px' }}>
   <div className="rohit">
     <h3>DB Instance Details:</h3>
