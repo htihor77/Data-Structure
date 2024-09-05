@@ -1,3 +1,24 @@
+
+.label {
+  display: inline-block; /* Ensures the label is properly displayed */
+  white-space: normal; /* Allows the label to wrap text */
+  overflow: visible; /* Prevents text from being hidden */
+  word-wrap: break-word; /* Breaks long words that may otherwise overflow */
+  width: auto; /* Adjusts width automatically */
+  max-width: 100%; /* Ensures it doesn’t exceed the container */
+}
+
+
+
+
+
+
+
+
+
+
+
+
 import React from 'react';
 
 const DatabaseDetailsTable = ({ dbDetails }) => {
