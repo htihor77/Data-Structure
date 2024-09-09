@@ -1,4 +1,48 @@
 
+
+const styles = {
+  chartContainer: {
+    display: 'flex',
+    justifyContent: 'flex-start', // Aligns everything to the left
+    alignItems: 'center',         // Vertically centers items
+    gap: '5px',                   // Controls space between the chart and the label
+    padding: '0',                 // Removes default padding
+  },
+  chartWrapper: {
+    width: '200px',               // Set width of the pie chart wrapper
+    height: '200px',              // Set height of the pie chart wrapper
+    padding: '0',                 // No padding around chart
+    margin: '0',                  // Ensure no default margins
+  },
+  labels: {
+    marginLeft: '5px',            // Reduce the space between the chart and the labels
+  }
+};
+
+function StatusDoughnutChart() {
+  return (
+    <div style={styles.chartContainer}>
+      <div style={styles.chartWrapper}>
+        <DoughnutChart
+          data={data}
+          options={{ maintainAspectRatio: false }} // Ensures chart respects the container size
+        />
+      </div>
+      <div style={styles.labels}>
+        <h4>DB Instance Details</h4>
+        {/* Add any other labels or data here */}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
 const styles = {
   chartContainer: {
     display: 'flex',         // Enables flexbox
