@@ -1,4 +1,42 @@
 
+const styles = {
+  chartContainer: {
+    display: 'flex',         // Enables flexbox
+    justifyContent: 'flex-start', // Aligns the chart to the left
+    alignItems: 'center',    // Vertically centers the chart
+    paddingRight: '10px',    // Add some padding to the right of the chart
+  },
+  chart: {
+    width: '200px',          // Set the width of the pie chart
+    height: '200px',         // Set the height of the pie chart
+  },
+  labels: {
+    marginLeft: '10px',      // Adjust the space between the pie chart and the label
+  }
+};
+
+function StatusDoughnutChart() {
+  return (
+    <div style={styles.chartContainer}>
+      <DoughnutChart
+        data={data}
+        width={styles.chart.width}
+        height={styles.chart.height}
+      />
+      <div style={styles.labels}>
+        <h4>DB Instance Details</h4>
+        {/* Add other labels here */}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
 .label {
   display: inline-block; /* Ensures the label is properly displayed */
   white-space: normal; /* Allows the label to wrap text */
