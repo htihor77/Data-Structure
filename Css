@@ -1,3 +1,198 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [cluster, setCluster] = useState('');
+  const [env, setEnv] = useState('');
+  const [dc, setDc] = useState('');
+  const [servers, setServers] = useState([]);
+  const [query, setQuery] = useState('');
+  const [queryResult, setQueryResult] = useState(null);
+  const [error, setError] = useState('');
+
+  const handleServerFetch = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/getServers', {
+        cluster,
+        env,
+        dc
+      });
+      setServers(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error fetching servers.');
+      setServers([]);
+    }
+  };
+
+  const handleQueryExecution = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/executeQuery', { query });
+      setQueryResult(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error executing query: ' + err.response.data.error);
+      setQueryResult(null);
+    }
+  };
+
+  return (
+    <div className="App">
+      <h1>Cassandra Query Executor</h1>
+      <div>
+        <label>Cluster:</label>
+        <select value={cluster} onChange={(e) => setCluster(e.target.value)}>
+          <option value="">Select Cluster</option>
+          <option value="OR">OR</option>
+          <option value="CART">CART</option>
+          <option value="CDN1">CDN1</option>
+          {/* Add more options based on your data */}
+        </select>
+      </div>
+      <div>
+        <label>ENV:</label>
+        <select value={env} onChange={(e) => setEnv(e.target.value)}>
+          <option value="">Select ENV</option>
+          <option value="QA1">QA1</option>
+          <option value="QA2">QA2</option>
+          <option value="QA3">QA3</option>
+          <option value="QA4">QA4</option>
+          <option value="QA5">QA5</option>
+          <option value="QA6">QA6</option>
+          {/* Add more options based on your data */}
+        </select>
+      </div>
+      <div>
+        <label>DC:</label>
+        <select value={dc} onChange={(e) => setDc(e.target.value)}>
+          <option value="">Select DC</option>
+          <option value="SDC1">SDC1</option>
+          <option value="EAST">EAST</option>
+          <option value="WEST">WEST</option>
+          {/* Add more options based on your data */}
+        </select>
+      </div>
+      <button onClick={handleServerFetch}>Fetch Servers</button>
+      {servers.length > 0 && (
+        <div>
+          <h3>Available Servers</h3>
+          <ul>
+            {servers.map((server, index) => (
+              <li key={index}>{server}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div>
+        <label>Query:</label>
+        <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+      </div>
+      <button onClick={handleQueryExecution}>Execute Query</button>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {queryResult && (
+        <div>
+          <h3>Query Result</h3>
+          <table border="1">
+            <thead>
+              <tr>
+                {Object.keys(queryResult[0]).map((key, index) => (
+                  <th key={index}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {queryResult.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {Object.values(row).map((value, cellIndex) => (
+                    <td key={cellIndex}>{value}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+const express = require('express');
+const cassandra = require('cassandra-driver');
+const app = express();
+const PORT = 5000;
+
+app.use(express.json());
+
+// Sample Data for Servers based on Cluster, ENV, and DC
+const serverList = {
+  "OR": {
+    "QA1": {
+      "SDC1": [
+        "mcs-cass-t1-n3.ebiz.verizon.com",
+        "mcs-cass-t1-n2.ebiz.verizon.com",
+        "mcs-cass-t1-n4.ebiz.verizon.com",
+        "mcs-cass-t1-n1.ebiz.verizon.com"
+      ]
+    }
+  }
+  // Add other clusters, ENV, and DC combinations here
+};
+
+// API to get servers based on Cluster, ENV, and DC
+app.post('/api/getServers', (req, res) => {
+  const { cluster, env, dc } = req.body;
+  if (serverList[cluster] && serverList[cluster][env] && serverList[cluster][env][dc]) {
+    res.json(serverList[cluster][env][dc]);
+  } else {
+    res.status(400).json({ error: 'Invalid Cluster, ENV, or DC' });
+  }
+});
+
+// Cassandra query execution
+const client = new cassandra.Client({
+  contactPoints: ['127.0.0.1'], // Replace with actual contact points
+  localDataCenter: 'datacenter1', // Replace with your data center
+  keyspace: 'your_keyspace' // Replace with your keyspace
+});
+
+app.post('/api/executeQuery', (req, res) => {
+  const { query } = req.body;
+  
+  // Prevent destructive queries
+  if (query.includes("DROP") || query.includes("DELETE")) {
+    return res.status(400).json({ error: "Query contains prohibited commands." });
+  }
+
+  client.execute(query, [], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error executing query' });
+    } else {
+      res.json(result.rows);
+    }
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
