@@ -1,3 +1,225 @@
+const express = require('express');
+const cassandra = require('cassandra-driver');
+const cors = require('cors');
+const app = express();
+const PORT = 5000;
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Cassandra client configuration
+const client = new cassandra.Client({
+  contactPoints: ['127.0.0.1'], // Replace with actual Cassandra contact point
+  localDataCenter: 'datacenter1', // Replace with your Cassandra Data Center
+  keyspace: 'your_keyspace' // Replace with your Cassandra keyspace
+});
+
+// POST route to execute Cassandra query
+app.post('/api/executeQuery', async (req, res) => {
+  const { cluster, env, dc, server, query } = req.body;
+
+  // Input validation
+  if (!cluster || !env || !dc || !server || !query) {
+    return res.status(400).json({ error: 'All inputs (Cluster, ENV, DC, Server, and Query) are required' });
+  }
+
+  // Check for prohibited commands
+  if (query.includes("DROP") || query.includes("DELETE")) {
+    return res.status(400).json({ error: "Query contains prohibited commands (DROP, DELETE)." });
+  }
+
+  // Assuming the query is valid, proceed with execution
+  try {
+    const result = await client.execute(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';  // Import the CSS file
+
+function App() {
+  const [cluster, setCluster] = useState('');
+  const [env, setEnv] = useState('');
+  const [dc, setDc] = useState('');
+  const [servers, setServers] = useState([]);
+  const [selectedServer, setSelectedServer] = useState('');
+  const [query, setQuery] = useState('');
+  const [queryResult, setQueryResult] = useState(null);
+  const [error, setError] = useState('');
+
+  // Predefined server list (now in the frontend)
+  const serverList = {
+    "OR": {
+      "QA1": {
+        "SDC1": [
+          "mcs-cass-t1-n1.ebiz.verizon.com",
+          "mcs-cass-t1-n2.ebiz.verizon.com",
+          "mcs-cass-t1-n3.ebiz.verizon.com",
+          "mcs-cass-t1-n4.ebiz.verizon.com"
+        ]
+      },
+      "QA2": {
+        "SDC1": [
+          "mcs-cass-t2-n1.ebiz.verizon.com",
+          "mcs-cass-t2-n2.ebiz.verizon.com"
+        ]
+      }
+    },
+    "CART": {
+      "QA1": {
+        "EAST": [
+          "mcs-cart-east-n1.ebiz.verizon.com",
+          "mcs-cart-east-n2.ebiz.verizon.com"
+        ]
+      }
+    }
+  };
+
+  // Fetch servers based on user selection
+  useEffect(() => {
+    if (cluster && env && dc) {
+      const fetchedServers = serverList[cluster]?.[env]?.[dc] || [];
+      setServers(fetchedServers);
+      setSelectedServer('');  // Reset server selection when new servers are fetched
+    }
+  }, [cluster, env, dc]);
+
+  const handleQueryExecution = async () => {
+    if (!selectedServer) {
+      setError('Please select a server.');
+      return;
+    }
+    if (!query) {
+      setError('Please enter a query.');
+      return;
+    }
+
+    // Send the query and inputs to the backend for execution
+    try {
+      const response = await axios.post('http://localhost:5000/api/executeQuery', {
+        cluster,
+        env,
+        dc,
+        server: selectedServer,
+        query
+      });
+      setQueryResult(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error executing query: ' + err.response?.data?.error || 'Unknown error');
+      setQueryResult(null);
+    }
+  };
+
+  return (
+    <div className="App">
+      <div className="container">
+        <h1>Cassandra Query Executor</h1>
+        <div className="form-group">
+          <label>Cluster:</label>
+          <select value={cluster} onChange={(e) => setCluster(e.target.value)}>
+            <option value="">Select Cluster</option>
+            <option value="OR">OR</option>
+            <option value="CART">CART</option>
+            <option value="CDN1">CDN1</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>ENV:</label>
+          <select value={env} onChange={(e) => setEnv(e.target.value)}>
+            <option value="">Select ENV</option>
+            <option value="QA1">QA1</option>
+            <option value="QA2">QA2</option>
+            <option value="QA3">QA3</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>DC:</label>
+          <select value={dc} onChange={(e) => setDc(e.target.value)}>
+            <option value="">Select DC</option>
+            <option value="SDC1">SDC1</option>
+            <option value="EAST">EAST</option>
+            <option value="WEST">WEST</option>
+          </select>
+        </div>
+
+        {/* Servers Dropdown */}
+        {servers.length > 0 && (
+          <div className="form-group">
+            <label>Servers:</label>
+            <select value={selectedServer} onChange={(e) => setSelectedServer(e.target.value)}>
+              <option value="">Select Server</option>
+              {servers.map((server, index) => (
+                <option key={index} value={server}>{server}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>Query:</label>
+          <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        <button onClick={handleQueryExecution} className="btn">Execute Query</button>
+        {error && <div className="error">{error}</div>}
+        {queryResult && (
+          <div>
+            <h3>Query Result</h3>
+            <table className="query-result">
+              <thead>
+                <tr>
+                  {Object.keys(queryResult[0]).map((key, index) => (
+                    <th key={index}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {queryResult.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.values(row).map((value, cellIndex) => (
+                      <td key={cellIndex}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import './App.css';  // Import the CSS file
 
