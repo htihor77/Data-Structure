@@ -1,3 +1,246 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';  // Import the CSS file
+
+function App() {
+  const [cluster, setCluster] = useState('');
+  const [env, setEnv] = useState('');
+  const [dc, setDc] = useState('');
+  const [servers, setServers] = useState([]);
+  const [query, setQuery] = useState('');
+  const [queryResult, setQueryResult] = useState(null);
+  const [error, setError] = useState('');
+
+  // Fetch servers automatically when cluster, env, or dc is changed
+  useEffect(() => {
+    const fetchServers = async () => {
+      if (cluster && env && dc) { // Only fetch if all 3 are selected
+        try {
+          const response = await axios.post('http://localhost:5000/api/getServers', {
+            cluster,
+            env,
+            dc
+          });
+          setServers(response.data);
+          setError('');
+        } catch (err) {
+          setError('Error fetching servers.');
+          setServers([]);
+        }
+      }
+    };
+
+    fetchServers();
+  }, [cluster, env, dc]); // This effect will run every time cluster, env, or dc changes
+
+  const handleQueryExecution = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/executeQuery', { query });
+      setQueryResult(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error executing query: ' + err.response.data.error);
+      setQueryResult(null);
+    }
+  };
+
+  return (
+    <div className="App">
+      <div className="container">
+        <h1>Cassandra Query Executor</h1>
+        <div className="form-group">
+          <label>Cluster:</label>
+          <select value={cluster} onChange={(e) => setCluster(e.target.value)}>
+            <option value="">Select Cluster</option>
+            <option value="OR">OR</option>
+            <option value="CART">CART</option>
+            <option value="CDN1">CDN1</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>ENV:</label>
+          <select value={env} onChange={(e) => setEnv(e.target.value)}>
+            <option value="">Select ENV</option>
+            <option value="QA1">QA1</option>
+            <option value="QA2">QA2</option>
+            <option value="QA3">QA3</option>
+            <option value="QA4">QA4</option>
+            <option value="QA5">QA5</option>
+            <option value="QA6">QA6</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>DC:</label>
+          <select value={dc} onChange={(e) => setDc(e.target.value)}>
+            <option value="">Select DC</option>
+            <option value="SDC1">SDC1</option>
+            <option value="EAST">EAST</option>
+            <option value="WEST">WEST</option>
+          </select>
+        </div>
+        {servers.length > 0 && (
+          <div>
+            <h3>Available Servers</h3>
+            <ul className="server-list">
+              {servers.map((server, index) => (
+                <li key={index}>{server}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="form-group">
+          <label>Query:</label>
+          <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        <button onClick={handleQueryExecution} className="btn">Execute Query</button>
+        {error && <div className="error">{error}</div>}
+        {queryResult && (
+          <div>
+            <h3>Query Result</h3>
+            <table className="query-result">
+              <thead>
+                <tr>
+                  {Object.keys(queryResult[0]).map((key, index) => (
+                    <th key={index}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {queryResult.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.values(row).map((value, cellIndex) => (
+                      <td key={cellIndex}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f7f7;
+}
+
+.App {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.container {
+  background: #ffffff;
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+select, textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+textarea {
+  height: 100px;
+}
+
+.btn {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #218838;
+}
+
+.server-list {
+  text-align: left;
+  margin: 20px 0;
+}
+
+.server-list li {
+  background: #f1f1f1;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.query-result {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.query-result th, .query-result td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.query-result th {
+  background-color: #f1f1f1;
+}
+
+.query-result tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+
+
+
+
+
+
+
+
 import React, { useState } from 'react';
 import axios from 'axios';
 
