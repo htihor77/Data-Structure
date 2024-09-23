@@ -7,6 +7,145 @@ function App() {
   const [env, setEnv] = useState('');
   const [dc, setDc] = useState('');
   const [servers, setServers] = useState([]);
+  const [selectedServer, setSelectedServer] = useState('');
+  const [query, setQuery] = useState('');
+  const [queryResult, setQueryResult] = useState(null);
+  const [error, setError] = useState('');
+
+  // Fetch servers automatically when cluster, env, or dc is changed
+  useEffect(() => {
+    const fetchServers = async () => {
+      if (cluster && env && dc) { // Only fetch if all 3 are selected
+        try {
+          const response = await axios.post('http://localhost:5000/api/getServers', {
+            cluster,
+            env,
+            dc
+          });
+          setServers(response.data);
+          setSelectedServer('');  // Reset selected server when new servers are fetched
+          setError('');
+        } catch (err) {
+          setError('Error fetching servers.');
+          setServers([]);
+        }
+      }
+    };
+
+    fetchServers();
+  }, [cluster, env, dc]); // This effect will run every time cluster, env, or dc changes
+
+  const handleQueryExecution = async () => {
+    if (!selectedServer) {
+      setError('Please select a server.');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:5000/api/executeQuery', { query });
+      setQueryResult(response.data);
+      setError('');
+    } catch (err) {
+      setError('Error executing query: ' + err.response.data.error);
+      setQueryResult(null);
+    }
+  };
+
+  return (
+    <div className="App">
+      <div className="container">
+        <h1>Cassandra Query Executor</h1>
+        <div className="form-group">
+          <label>Cluster:</label>
+          <select value={cluster} onChange={(e) => setCluster(e.target.value)}>
+            <option value="">Select Cluster</option>
+            <option value="OR">OR</option>
+            <option value="CART">CART</option>
+            <option value="CDN1">CDN1</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>ENV:</label>
+          <select value={env} onChange={(e) => setEnv(e.target.value)}>
+            <option value="">Select ENV</option>
+            <option value="QA1">QA1</option>
+            <option value="QA2">QA2</option>
+            <option value="QA3">QA3</option>
+            <option value="QA4">QA4</option>
+            <option value="QA5">QA5</option>
+            <option value="QA6">QA6</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>DC:</label>
+          <select value={dc} onChange={(e) => setDc(e.target.value)}>
+            <option value="">Select DC</option>
+            <option value="SDC1">SDC1</option>
+            <option value="EAST">EAST</option>
+            <option value="WEST">WEST</option>
+          </select>
+        </div>
+
+        {/* Servers Dropdown */}
+        {servers.length > 0 && (
+          <div className="form-group">
+            <label>Servers:</label>
+            <select value={selectedServer} onChange={(e) => setSelectedServer(e.target.value)}>
+              <option value="">Select Server</option>
+              {servers.map((server, index) => (
+                <option key={index} value={server}>{server}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>Query:</label>
+          <textarea value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        <button onClick={handleQueryExecution} className="btn">Execute Query</button>
+        {error && <div className="error">{error}</div>}
+        {queryResult && (
+          <div>
+            <h3>Query Result</h3>
+            <table className="query-result">
+              <thead>
+                <tr>
+                  {Object.keys(queryResult[0]).map((key, index) => (
+                    <th key={index}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {queryResult.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.values(row).map((value, cellIndex) => (
+                      <td key={cellIndex}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';  // Import the CSS file
+
+function App() {
+  const [cluster, setCluster] = useState('');
+  const [env, setEnv] = useState('');
+  const [dc, setDc] = useState('');
+  const [servers, setServers] = useState([]);
   const [query, setQuery] = useState('');
   const [queryResult, setQueryResult] = useState(null);
   const [error, setError] = useState('');
