@@ -1,3 +1,78 @@
+
+import React, { useState } from 'react';
+
+function DatabaseHealthCheckReports({ group, keys }) {
+  // State to store the killed items based on SID
+  const [killedItems, setKilledItems] = useState({});
+
+  // Function to handle the kill process
+  const killProcess = (item) => {
+    // Mark the specific item as killed using its SID
+    setKilledItems((prevKilledItems) => ({
+      ...prevKilledItems,
+      [item.SID]: true,  // Use SID as the key to disable the row's button
+    }));
+
+    // Trigger the alert after the process is marked as killed
+    window.alert(`Killing process for SID: ${item.SID}`);
+  };
+
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+      <thead>
+        <tr>
+          {keys.map((key) => (
+            <th
+              key={key}
+              style={{
+                border: '1px solid #ddd',
+                padding: '8px',
+                backgroundColor: '#f2f2f2',
+                color: '#626355',
+                fontSize: '12px',
+              }}
+            >
+              {key}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {group.map((item, rowIndex) => (
+          <tr key={rowIndex}>
+            {keys.map((key) => (
+              <td
+                key={key}
+                style={{
+                  border: '1px solid #ddd',
+                  padding: '8px',
+                }}
+              >
+                {/* Check if the key is "Action" and render the button */}
+                {key === 'Action' ? (
+                  <button
+                    className="btn btn-primary btn-block"
+                    onClick={() => killProcess(item)}
+                    disabled={!!killedItems[item.SID]} // Disable button for the specific row
+                  >
+                    {killedItems[item.SID] ? 'Killed' : 'Kill'}
+                  </button>
+                ) : (
+                  // Render the other column values if the key is not "Action"
+                  typeof item[key] === 'number' ? item[key].toFixed(1) : item[key]
+                )}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export default DatabaseHealthCheckReports;
+
+
 const express = require('express');
 const cors = require('cors');
 const cassandra = require('cassandra-driver');
