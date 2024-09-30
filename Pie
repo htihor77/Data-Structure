@@ -1,3 +1,52 @@
+const renderColumn = (columnData) => (
+  <div style={{ width: '100%' }}>
+    {columnData.map((group, index) => (
+      <div key={index}>
+        {/* Common Header */}
+        <div style={headerStyle}>{group.header}</div>
+        
+        {/* Chart Content (if available) */}
+        {chartContent && group.header.includes("Details") && (
+          <StatusDoughnutChart data={chartContent} />
+        )}
+
+        {/* If the group has data (rows), highlight them in yellow */}
+        {group.rows.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {Object.keys(group.rows[0]).map((key) => (
+                  <th key={key} style={thStyle}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((item, rowIndex) => (
+                <tr key={rowIndex} style={{ backgroundColor: 'yellow' }}>
+                  {Object.keys(item).map((key) => (
+                    <td key={key} style={tdStyle}>{item[key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Default message if no data */}
+        {group.rows.length === 0 && (
+          <div style={{ color: 'green' }}>
+            <h5>No data available for {group.header}</h5>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
+
+
+
+
 
 import React, { useState } from 'react';
 
