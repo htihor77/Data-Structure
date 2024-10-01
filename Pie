@@ -1,4 +1,8 @@
+I am writing to request your approval for my involvement in a chatbot development project being handled by another team. This project is quite new to me—both exciting and challenging. I believe that contributing to it will provide me with a valuable learning experience, especially since this is my first time working with AAP-based approvals.
 
+Though I plan to contribute as a shadow member, ensuring my current responsibilities aren't affected, I will put in extra effort from my side to actively participate. By working on this project, I aim to gain new skills that will benefit our team and help in updating our processes as well.
+
+I kindly seek your guidance and approval for my involvement in this project, as it will be a great opportunity to learn and contribute simultaneously.
 const renderColumn = (columnData) => (
   <div style={{ width: '100%' }}>
     {columnData.map((group, index) => (
