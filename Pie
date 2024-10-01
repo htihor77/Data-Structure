@@ -1,3 +1,155 @@
+
+const renderColumn = (columnData) => (
+  <div style={{ width: '100%' }}>
+    {columnData.map((group, index) => (
+      <div key={index}>
+        {/* Group Header */}
+        <div style={headerStyle}>{group.header}</div>
+
+        {/* Blockers: Highlight all rows */}
+        {group.header === "Blockers" && group.rows.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {Object.keys(group.rows[0]).map((key) => (
+                  <th key={key} style={thStyle}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((item, rowIndex) => (
+                <tr key={rowIndex} style={{ backgroundColor: 'yellow' }}>
+                  {Object.keys(item).map((key) => (
+                    <td key={key} style={tdStyle}>{item[key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Long Runners: Highlight rows with Cur_SQL(min) > 5 */}
+        {group.header === "Long Runners" && group.rows.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {Object.keys(group.rows[0]).map((key) => (
+                  <th key={key} style={thStyle}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((item, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  style={{
+                    backgroundColor: parseFloat(item["Cur_SQL(min)"]) > 5 ? 'yellow' : 'transparent',
+                  }}
+                >
+                  {Object.keys(item).map((key) => (
+                    <td key={key} style={tdStyle}>{item[key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* ASM Diskgroup Usage: Highlight rows where Used PCT >= 95 */}
+        {group.header === "ASM Diskgroup Usage" && group.rows.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {Object.keys(group.rows[0]).map((key) => (
+                  <th key={key} style={thStyle}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((item, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  style={{
+                    backgroundColor: parseFloat(item["Used PCT"]) >= 95 ? 'yellow' : 'transparent',
+                  }}
+                >
+                  {Object.keys(item).map((key) => (
+                    <td key={key} style={tdStyle}>{item[key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Current Active Sessions: Highlight rows where Count > 100 */}
+        {group.header === "Current Active Sessions" && group.rows.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                {Object.keys(group.rows[0]).map((key) => (
+                  <th key={key} style={thStyle}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((item, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  style={{
+                    backgroundColor: parseInt(item["Count"], 10) > 100 ? 'yellow' : 'transparent',
+                  }}
+                >
+                  {Object.keys(item).map((key) => (
+                    <td key={key} style={tdStyle}>{item[key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* If there's no data, show a default message */}
+        {group.rows.length === 0 && (
+          <div style={{ color: 'green' }}>
+            <h5>No data available for {group.header}</h5>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const renderColumn = (columnData) => (
   <div style={{ width: '100%' }}>
     {columnData.map((group, index) => (
