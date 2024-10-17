@@ -1,3 +1,18 @@
+
+<button
+  style={{
+    width: '50%',    // Adjust percentage width based on need
+    margin: '0 auto', // Centers the button horizontally
+    display: 'block', // Ensures the button is treated as a block element
+    padding: '5px',   // Adjust the padding for a small button
+    fontSize: '12px', // Adjust the font size for neatness
+    textAlign: 'center' // Ensures text inside button is centered
+  }}
+  className="btn btn-primary btn-block"
+/>
+
+
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';  // Import the CSS file
