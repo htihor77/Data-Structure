@@ -1,3 +1,29 @@
+<td key={key} style={{ 
+  border: '1px solid #ddd', 
+  padding: '8px', 
+  textAlign: key === 'Alertlog' ? 'center' : 'left' 
+}}>
+  {typeof item[key] === 'number' ? (
+    Number.isInteger(item[key]) ? item[key] : item[key].toFixed(1)
+  ) : (
+    key === 'Alertlog' && (
+      <button 
+        style={{
+          width: '60%',
+          display: 'block',
+          margin: '0 auto',  // Center the button horizontally
+          textAlign: 'center'
+        }} 
+        className="btn btn-primary btn-block" 
+        onClick={() => KillProcess(item)}
+      >
+        Download
+      </button>
+    )
+  )}
+</td>
+
+
 
 <button
   style={{
