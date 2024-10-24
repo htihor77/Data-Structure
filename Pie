@@ -1,8 +1,92 @@
-I am writing to request your approval for my involvement in a chatbot development project being handled by another team. This project is quite new to me—both exciting and challenging. I believe that contributing to it will provide me with a valuable learning experience, especially since this is my first time working with AAP-based approvals.
+// Function to fetch the alert log data and convert it to an HTML table
+async function fetchAndDownloadAlertLogTable() {
+    try {
+        // Fetch the data from the backend
+        const response = await axiosConfig.post('/DatabaseHealthCheckReports/db_alertlog', {
+            env, cred_env, host_Name, dbName, portNum, noRecentLines
+        });
 
-Though I plan to contribute as a shadow member, ensuring my current responsibilities aren't affected, I will put in extra effort from my side to actively participate. By working on this project, I aim to gain new skills that will benefit our team and help in updating our processes as well.
+        if (response.status === 200) {
+            const alertLogData = response.data;  // This is the JSON data
+            const tableHTML = generateHTMLTable(alertLogData);  // Generate the table HTML
 
-I kindly seek your guidance and approval for my involvement in this project, as it will be a great opportunity to learn and contribute simultaneously.
+            // Create a Blob with the table HTML and trigger the download as an .html file
+            downloadAsHTMLFile(tableHTML, `${host_Name}_alertlog.html`);
+        }
+    } catch (error) {
+        console.error("Error fetching data: ", error);
+    }
+}
+
+// Function to generate an HTML table from JSON data
+function generateHTMLTable(alertLogData) {
+    // Begin HTML structure for the table
+    let table = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alert Log Table</title>
+        <style>
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        </style>
+    </head>
+    <body>
+        <h2>Alert Log Data for ${alertLogData.ALERTLOGHOST}</h2>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Message Text</th>
+            </tr>`;
+
+    // Iterate through the alert log data to fill in the rows
+    for (const [key, value] of Object.entries(alertLogData)) {
+        if (key === 'MESSAGE_TEXT') {
+            for (const message of value) {
+                table += `<tr><td>${key}</td><td>${message}</td></tr>`;
+            }
+        } else {
+            table += `<tr><td>${key}</td><td>${value}</td></tr>`;
+        }
+    }
+
+    // Close the table and HTML structure
+    table += `
+        </table>
+    </body>
+    </html>`;
+
+    return table;
+}
+
+// Function to download the table HTML as a file
+function downloadAsHTMLFile(htmlContent, fileName) {
+    // Create a Blob with the HTML content and the MIME type 'text/html'
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    
+    // Create a link element to trigger the download
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = fileName;  // Specify the filename for download
+    
+    // Append the link to the body and trigger the click to download the file
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up the link element after the download is triggered
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// Trigger the download process
+fetchAndDownloadAlertLogTable();
+
+
+
 const renderColumn = (columnData) => (
   <div style={{ width: '100%' }}>
     {columnData.map((group, index) => (
