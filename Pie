@@ -1,4 +1,51 @@
 
+function generateHTMLTable(alertLogData, name) {
+    let table = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alert Log Table</title>
+        <style>
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        </style>
+    </head>
+    <body>
+        <h2>Alert Log Data for ${name}</h2>
+        <table>
+            <tr>
+                <th>Content</th>
+            </tr>
+    `;
+
+    // Check if alertLogData contains the key "MESSAGE_TEXT"
+    if (alertLogData["MESSAGE_TEXT"]) {
+        // Split the continuous string into individual messages based on "MESSAGE_TEXT: "
+        const messages = alertLogData["MESSAGE_TEXT"].split(/MESSAGE_TEXT:\s*/).filter(Boolean);
+
+        // Iterate through each message and add it as a row in the HTML table
+        messages.forEach(messageContent => {
+            table += `<tr><td>${messageContent.trim()}</td></tr>`;
+        });
+    }
+
+    // Close the table and HTML structure
+    table += `
+        </table>
+    </body>
+    </html>
+    `;
+
+    return table;
+}
+
+
+
+
+
+
 // Function to fetch the alert log data and convert it to an HTML table
 async function fetchAndDownloadAlertLogTable() {
     try {
