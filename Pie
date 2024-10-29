@@ -1,4 +1,29 @@
+function generateDataText(alertLogData) {
+    let textContent = 'Alert Log Data\n\n';
 
+    for (const entry of alertLogData) {
+        if (entry["MESSAGE_TEXT"]) {
+            // Apply the same filter: replace newlines with spaces and trim
+            const messageContent = entry["MESSAGE_TEXT"].replace(/\n/g, ' ').trim();
+            textContent += `Content: ${messageContent}\n\n`;
+        }
+    }
+
+    // Create a Blob from the text content
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link to download the file
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'alert_log_data.txt';
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up by revoking the object URL
+    URL.revokeObjectURL(url);
+}
 
 const fs = require('fs');
 
