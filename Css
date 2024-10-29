@@ -1,3 +1,49 @@
+function generateHTMLTable(alertLogData, name) {
+    let table = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alert Log Table</title>
+        <style>
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        </style>
+    </head>
+    <body>
+        <h2>Alert Log Data for ${name}</h2>
+        <table>
+            <tr>
+                <th>Content</th>
+            </tr>
+    `;
+
+    // Iterate through the alert log data array
+    for (const entry of alertLogData) {
+        if (entry["MESSAGE_TEXT"]) {
+            // Extract the message content directly without the "MESSAGE_TEXT" key
+            const messageContent = entry["MESSAGE_TEXT"].replace(/\n/g, '').trim();
+
+            // Add the cleaned message content to the table row
+            table += `<tr><td>${messageContent}</td></tr>`;
+        }
+    }
+
+    // Close the table and HTML structure
+    table += `
+        </table>
+    </body>
+    </html>
+    `;
+
+    return table;
+}
+
+
+
+
+
 "Thank you for the appreciation! I'm glad to contribute to the team and will continue working with the same momentum, especially with the upcoming AI Slack bot project. Looking forward to more successful automation implementations in the SRE DB space."
 // Function to fetch the alert log data and convert it to an HTML table
 async function fetchAndDownloadAlertLogTable() {
