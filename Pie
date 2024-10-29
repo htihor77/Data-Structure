@@ -1,3 +1,27 @@
+
+
+const fs = require('fs');
+
+function generateDataText(alertLogData) {
+    let textContent = 'Alert Log Data\n\n';
+
+    for (const entry of alertLogData) {
+        if (entry["MESSAGE_TEXT"]) {
+            // Apply the same filter: replace newlines with spaces and trim
+            const messageContent = entry["MESSAGE_TEXT"].replace(/\n/g, ' ').trim();
+            textContent += `Content: ${messageContent}\n\n`;
+        }
+    }
+
+    // Write the filtered content to a text file
+    fs.writeFileSync('alert_log_data.txt', textContent, 'utf8');
+    console.log('Data written to alert_log_data.txt');
+}
+
+
+
+
+
 Here’s a revised draft for the Word document, focusing on explaining the process and use case for the Slack AI bot to present to your manager and team. This version outlines the project steps, the use case, and the potential impact on the DB team, aiming to clarify the bot's value and implementation process.
 
 
