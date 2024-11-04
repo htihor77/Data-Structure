@@ -1,3 +1,49 @@
+
+import React, { useState } from 'react';
+
+// Popup component
+const Popup = ({ content, onClose }) => (
+  <div style={{
+    position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+    padding: '20px', backgroundColor: 'white', border: '1px solid #ccc', zIndex: 1000
+  }}>
+    <h3>Alert Log Content</h3>
+    <pre>{content}</pre>
+    <button onClick={onClose}>Close</button>
+  </div>
+);
+
+function YourComponent() {
+  const [isPopupVisible, setPopupVisible] = useState(false);
+  const [popupContent, setPopupContent] = useState('');
+
+  // Mock data fetch or any logic to get content for "View" button
+  const handleViewClick = () => {
+    const content = "This is the alert log content you want to display."; // Replace with actual fetch logic
+    setPopupContent(content);
+    setPopupVisible(true);
+  };
+
+  const handleClosePopup = () => {
+    setPopupVisible(false);
+  };
+
+  return (
+    <div>
+      <button className="download-btn">Download</button>
+      <button className="view-btn" onClick={handleViewClick}>View</button>
+      
+      {isPopupVisible && <Popup content={popupContent} onClose={handleClosePopup} />}
+    </div>
+  );
+}
+
+export default YourComponent;
+
+
+
+
+
 function generateHTMLTable(alertLogData, name) {
     let table = `
     <!DOCTYPE html>
