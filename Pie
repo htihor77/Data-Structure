@@ -1,3 +1,22 @@
+
+<button className="btn btn-primary btn-block" type="submit" onClick={handleSubmit} style={{
+  backgroundColor: "#007bff",
+  color: "#fff",
+  border: "none",
+  padding: "10px 20px",
+  fontSize: "16px",
+  fontWeight: "bold",
+  borderRadius: "5px",
+  boxShadow: "0 5px #0056b3",
+  transform: "translateY(-2px)",
+  transition: "all 0.2s ease"
+}} onMouseDown={(e) => e.target.style.transform = "translateY(0px)"}
+onMouseUp={(e) => e.target.style.transform = "translateY(-2px)"}>
+  <span>Submit</span>
+</button>
+
+
+
 function generateDataText(alertLogData) {
     let textContent = 'Alert Log Data\n\n';
 
