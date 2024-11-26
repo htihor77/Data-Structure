@@ -1,3 +1,77 @@
+
+const oracledb = require('oracledb');
+
+async function processNodes() {
+  try {
+    // Database connection configuration
+    const dbConfig = {
+      user: 'your_db_user',
+      password: 'your_db_password',
+      connectString: 'your_host:your_port/your_service_name',
+    };
+
+    // Create a database connection
+    const connection = await oracledb.getConnection(dbConfig);
+
+    // Step 1: Query all rows from `sredb.org` (or your table name)
+    const fetchAllNodesQuery = `
+      SELECT * 
+      FROM sredb.org`;
+    const result = await connection.execute(fetchAllNodesQuery);
+
+    console.log('Fetched Nodes:', result.rows);
+
+    // Step 2: Iterate through each row and process it individually
+    for (const row of result.rows) {
+      const [hostname, dbname, portnum, sqlId] = row;
+
+      console.log(`Processing Node: Hostname=${hostname}, DBName=${dbname}, Port=${portnum}, SQL_ID=${sqlId}`);
+
+      // Step 3: Build connection string for the current node
+      const nodeConnectionString = `${hostname}:${portnum}/${dbname}`;
+
+      // Node-specific configuration
+      const nodeConfig = {
+        user: 'node_user',
+        password: 'node_password',
+        connectString: nodeConnectionString,
+      };
+
+      try {
+        // Step 4: Connect to the current node and run the query
+        const nodeConnection = await oracledb.getConnection(nodeConfig);
+
+        const planHashQuery = `
+          SELECT inst_id, sql_id, plan_hash_value
+          FROM gv$sql_plan
+          WHERE sql_id = :sqlId`;
+        const planHashResult = await nodeConnection.execute(planHashQuery, [sqlId]);
+
+        // Step 5: Log the result for the current node
+        console.log(`Results for Node ${hostname}:`);
+        console.table(planHashResult.rows);
+
+        // Close the connection for the current node
+        await nodeConnection.close();
+      } catch (err) {
+        console.error(`Error processing node ${hostname}:`, err);
+      }
+    }
+
+    // Step 6: Close the main database connection
+    await connection.close();
+
+    console.log('All nodes processed successfully.');
+  } catch (err) {
+    console.error('Error:', err);
+  }
+}
+
+// Run the function
+processNodes();
+
+
+
 Here's a polished version of your statements for tasks that involve code-level changes and cannot be captured via screenshots:
 
 
