@@ -1,4 +1,97 @@
+const oracledb = require('oracledb');
 
+router.post('/plan_change', async (req, res) => {
+  try {
+    console.log('Request body is:', req.body);
+    const { sqlId } = req.body;
+
+    if (!sqlId) {
+      throw new Error('SQL ID is missing in the request body');
+    }
+
+    // Step 1: Establish initial database connection
+    const connection = await oracledb.getConnection(dbConfig);
+
+    // Step 2: Fetch rows and convert to JSON structure
+    const result = await connection.execute('SELECT * FROM SREDBAUTO.DBNAMEGROUP');
+    const rows = result.rows; // Extract rows from the query
+
+    if (!Array.isArray(rows)) {
+      throw new Error('Query result does not contain an iterable "rows" property');
+    }
+
+    // Convert rows to JSON objects for processing
+    const jsonRows = rows.map(([HOST, SERVICE_NAME, PORT]) => ({
+      HOST,
+      SERVICE_NAME,
+      PORT,
+    }));
+
+    console.log('Converted rows to JSON:', jsonRows);
+
+    let concatenatedRows = []; // To store results from each host
+    const nodeConnections = []; // Array to manage connections
+
+    // Step 3: Loop through each host in JSON format and process sequentially
+    for (let i = 0; i < jsonRows.length; i++) {
+      const { HOST, SERVICE_NAME, PORT } = jsonRows[i];
+      console.log(`Processing Node ${i + 1}: Hostname=${HOST}, ServiceName=${SERVICE_NAME}, Port=${PORT}`);
+
+      // Construct connection string
+      const nodeConnectionString = `${HOST}:${PORT}/${SERVICE_NAME}`;
+      const nodeConfig = {
+        user: 'oracle_NR_info_NP_user',
+        password: 'oracle_NR_info_NP_password',
+        connectString: nodeConnectionString,
+      };
+
+      try {
+        // Establish a connection for this node
+        const nodeConnection = await oracledb.getConnection(nodeConfig);
+        nodeConnections.push(nodeConnection); // Track connection
+
+        // Execute the query for this node
+        const planHashResult = await nodeConnection.execute(`
+          SELECT inst_id, sql_id, child_number AS child, plan_hash_value AS plan_hash, 
+                 buffer_gets / executions AS "GETS/EXEC",
+                 rows_processed / executions AS "ROWS/EXEC",
+                 elapsed_time / executions / 1000 AS "ET/EXEC(Ms)",
+                 ROUND(elapsed_time / executions / 1000, 2) AS "Elapsed Time (ms)"
+          FROM gv$sql
+          WHERE sql_id = :sqlId
+            AND executions > 0
+          ORDER BY inst_id, plan_hash_value
+        `, [sqlId]);
+
+        if (planHashResult && Array.isArray(planHashResult.rows)) {
+          console.log(`Results for Node ${i + 1}: ${HOST}`);
+          console.table(planHashResult.rows);
+
+          // Concatenate results for this node
+          concatenatedRows.push(...planHashResult.rows);
+        }
+      } catch (error) {
+        console.error(`Error processing Node ${i + 1}:`, error.message);
+      }
+    }
+
+    // Step 4: Close all connections
+    for (let i = 0; i < nodeConnections.length; i++) {
+      try {
+        await nodeConnections[i].close();
+        console.log(`Connection ${i + 1} closed.`);
+      } catch (error) {
+        console.error(`Error closing Connection ${i + 1}:`, error.message);
+      }
+    }
+
+    // Step 5: Send the final response
+    res.status(200).json({ success: true, data: concatenatedRows });
+  } catch (err) {
+    console.error('Caught exception:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 <button className="btn btn-primary btn-block" type="submit" onClick={handleSubmit} style={{
   backgroundColor: "#007bff",
   color: "#fff",
