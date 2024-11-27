@@ -1,3 +1,64 @@
+router.post('/plan_change', async (req, res) => {
+  let mainConnection;
+
+  try {
+    console.log('Request Body:', req.body);
+    const { sqlId } = req.body;
+
+    if (!sqlId) throw new Error('SQL ID is required');
+
+    // Fetch rows from the main DB
+    mainConnection = await oracledb.getConnection(dbConfig);
+    const result = await mainConnection.execute('SELECT * FROM SREDBAUTO.DBNAMEGROUP');
+    const rows = result.rows;
+
+    if (!Array.isArray(rows)) throw new Error('Query result is not iterable');
+
+    // Process each row dynamically
+    const results = [];
+    for (let i = 0; i < rows.length; i++) {
+      const [HOST, SERVICE_NAME, PORT] = rows[i];
+      console.log(`Processing Node ${i + 1}: Host=${HOST}, ServiceName=${SERVICE_NAME}, Port=${PORT}`);
+
+      const nodeConnectionString = `${HOST}:${PORT}/${SERVICE_NAME}`;
+      const nodeConfig = {
+        user: 'oracle_user',
+        password: 'oracle_password',
+        connectString: nodeConnectionString,
+      };
+
+      let nodeConnection;
+      try {
+        // Connect to each node
+        nodeConnection = await oracledb.getConnection(nodeConfig);
+        const nodeResult = await nodeConnection.execute(`
+          SELECT inst_id, sql_id, plan_hash_value, executions
+          FROM gv$sql WHERE sql_id = :sqlId`, [sqlId]);
+        results.push(...nodeResult.rows); // Add to results array
+      } catch (err) {
+        console.error(`Error processing node ${i + 1}:`, err.message);
+      } finally {
+        if (nodeConnection) {
+          await nodeConnection.close();
+        }
+      }
+    }
+
+    // Return aggregated results
+    res.status(200).json({ success: true, data: results });
+  } catch (err) {
+    console.error('Error:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    if (mainConnection) {
+      await mainConnection.close();
+    }
+  }
+});
+
+
+
+
 const oracledb = require('oracledb');
 
 router.post('/plan_change', async (req, res) => {
