@@ -1,4 +1,62 @@
+const oracledb = require('oracledb');
+const readline = require('readline');
 
+let connection; // Global connection variable
+
+async function connectToDatabase() {
+  const dbConfig = {
+    user: 'tadina', // Replace with your database username
+    password: 'tadina', // Replace with your database password
+    connectString: 'nposqa2.ebiz.verizon.com:2055/nposqa2', // Replace with your connection string
+  };
+
+  try {
+    // Establish the connection
+    connection = await oracledb.getConnection(dbConfig);
+    console.log('Database connection established successfully.');
+  } catch (error) {
+    console.error('Failed to connect to the database:', error.message);
+  }
+}
+
+async function closeDatabaseConnection() {
+  try {
+    if (connection) {
+      await connection.close();
+      console.log('Database connection closed successfully.');
+    } else {
+      console.log('No active connection to close.');
+    }
+  } catch (error) {
+    console.error('Failed to close the database connection:', error.message);
+  }
+}
+
+// Create a command-line interface for user input
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+async function main() {
+  await connectToDatabase(); // Establish the connection
+
+  console.log('Type "close" to close the database connection or "exit" to quit the program.');
+
+  rl.on('line', async (input) => {
+    if (input.trim().toLowerCase() === 'close') {
+      await closeDatabaseConnection(); // Close the connection
+    } else if (input.trim().toLowerCase() === 'exit') {
+      console.log('Exiting program...');
+      rl.close();
+      process.exit(0); // Exit the process
+    } else {
+      console.log('Invalid command. Type "close" to close the database connection or "exit" to quit.');
+    }
+  });
+}
+
+main();
 const oracledb = require('oracledb');
 
 async function processNodes() {
