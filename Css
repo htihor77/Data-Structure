@@ -20,6 +20,69 @@ async function connectToDatabase(index) {
   }
 }
 
+async function closeAllConnections() {
+  try {
+    for (const connEntry of connections) {
+      await connEntry.connection.close();
+      console.log(`Connection ${connEntry.id}: Closed successfully.`);
+    }
+    connections = []; // Clear all connections
+    console.log('All connections closed.');
+  } catch (error) {
+    console.error('Failed to close all connections:', error.message);
+  }
+}
+
+// Create a command-line interface for user input
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+async function main() {
+  console.log('Starting to establish 10 connections...');
+  for (let i = 1; i <= 10; i++) {
+    await connectToDatabase(i); // Create and keep each connection open
+  }
+  console.log('All connections established and kept open.');
+  console.log('Type "exit" to close all connections and quit the program.');
+
+  rl.on('line', async (input) => {
+    if (input.trim().toLowerCase() === 'exit') {
+      console.log('Exiting program...');
+      await closeAllConnections(); // Ensure all connections are closed before exiting
+      rl.close();
+      process.exit(0);
+    } else {
+      console.log('Invalid command. Type "exit" to quit.');
+    }
+  });
+}
+
+main();
+
+const oracledb = require('oracledb');
+const readline = require('readline');
+
+let connections = []; // Array to store active connections
+
+const dbConfig = {
+  user: 'tadina', // Replace with your database username
+  password: 'tadina', // Replace with your database password
+  connectString: 'nposqa2.ebiz.verizon.com:2055/nposqa2', // Replace with your database connection string
+};
+
+async function connectToDatabase(index) {
+  try {
+    // Establish a database connection
+    const connection = await oracledb.getConnection(dbConfig);
+    connections.push({ id: index, connection });
+    console.log(`Connection ${index}: Established successfully and kept open.`);
+  } catch (error) {
+    console.error(`Connection ${index}: Failed - ${error.message}`);
+  }
+}
+
 async function closeDatabaseConnection(index) {
   try {
     const connectionEntry = connections.find((conn) => conn.id === index);
