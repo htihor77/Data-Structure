@@ -1,3 +1,121 @@
+
+import React, { useState } from 'react';
+
+const App = () => {
+    const [loading, setLoading] = useState(0); // To track progress
+    const [results, setResults] = useState(null); // To store the final query results
+
+    const handleSubmit = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/plan_change', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ /* Add payload if needed */ }),
+            });
+
+            // Check if the response body is available for streaming
+            if (!response.body) {
+                console.error('Streaming not supported');
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+            let dataChunks = '';
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                if (readerDone) {
+                    done = true;
+                    break;
+                }
+
+                dataChunks += decoder.decode(value, { stream: true });
+
+                // Process the received data chunks
+                const data = JSON.parse(dataChunks);
+                
+                // Update progress if available
+                if (data.progress !== undefined) {
+                    setLoading(data.progress); // Update loading based on progress value
+                }
+
+                // If the process is complete, set results
+                if (data.message === 'All queries completed!') {
+                    setResults(data.results);
+                    setLoading(100); // Set progress to 100% when done
+                }
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    };
+
+    return (
+        <div>
+            <h1>Query Execution</h1>
+            <button onClick={handleSubmit}>Start Queries</button>
+            <div>
+                <progress value={loading} max="100" />
+                <p>{loading}% completed</p>
+            </div>
+            {results && (
+                <div>
+                    <h2>Results:</h2>
+                    <ul>
+                        {results.map((result, index) => (
+                            <li key={index}>{result}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default App;
+
+
+router.post('/plan_change', async (req, res) => {
+    try {
+        res.setHeader('Content-Type', 'application/json'); // Set header to JSON response
+        res.setHeader('Cache-Control', 'no-cache'); // Prevent caching of responses
+        res.setHeader('Connection', 'keep-alive'); // Keep the connection open
+
+        const totalQueries = 21; // Total number of queries to process
+        const batchSize = 5;     // Number of queries after which progress is updated
+        let queryResults = [];   // To store results of all queries
+        let progress = 0;        // Track progress
+
+        for (let i = 1; i <= totalQueries; i++) {
+            // Simulate query execution (replace this with your actual query logic)
+            const result = await new Promise((resolve) => setTimeout(() => resolve(`Query ${i} result`), 500));
+            queryResults.push(result);
+
+            // Send progress update after every `batchSize` queries
+            if (i % batchSize === 0 || i === totalQueries) {
+                progress = Math.round((i / totalQueries) * 100); // Calculate progress as percentage
+                res.write(JSON.stringify({ progress })); // Send progress update
+            }
+        }
+
+        // After all queries are processed, send the final result
+        res.write(JSON.stringify({ message: 'All queries completed!', progress: 100, results: queryResults }));
+        res.end(); // End the response
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
+
+
+
+
 Congratulations on your recognition! Here's a simple way to thank your manager:
 
 "I sincerely thank my manager for the special words and encouragement on stage today. Your support and recognition mean a lot to me and motivate me to strive for even greater achievements. I'm grateful to be part of this team under your guidance."
