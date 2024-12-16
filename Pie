@@ -1,3 +1,37 @@
+
+Here's an updated email draft based on the details you provided:
+
+
+---
+
+Subject: Issue Accessing Stock Plan Option
+
+Dear [Support Team/Relevant Department],
+
+I am writing to report an issue I have been experiencing with my stock portal account. While my account is active and functional, I am unable to access the Stock Plan option. Specifically, when I try to click on it, the system displays the message:
+
+"The system is currently unavailable. Please try to log in later."
+
+This issue has persisted for the past two months, and despite waiting and retrying at different times, the problem remains unresolved.
+
+Could you please look into this and provide a resolution? If you need any further details or account-specific information, I would be happy to provide them.
+
+Thank you for your support, and I look forward to hearing from you soon.
+
+Best regards,
+[Your Full Name]
+[Your Contact Information]
+[Account ID/Details, if applicable]
+
+
+---
+
+Let me know if you’d like any further adjustments!
+
+
+
+
+
 router.post('/plan_change', async (req, res) => {
   let mainConnection;
 
