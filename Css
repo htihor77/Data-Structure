@@ -1,4 +1,139 @@
 
+const express = require('express');
+const app = express();
+const PORT = 3000;
+
+// Middleware for parsing JSON
+app.use(express.json());
+
+// Simulated database connection function
+const executeQuery = async (query) => {
+    return new Promise((resolve) => setTimeout(resolve, 500)); // Simulate query delay
+};
+
+// POST endpoint to handle incoming variables and query execution
+app.post('/DatabaseHealthCheckReports', async (req, res) => {
+    const { var1, var2, var3, var4, var5 } = req.body; // Accept variables from frontend
+    console.log("Received variables:", var1, var2, var3, var4, var5);
+
+    const queries = Array.from({ length: 22 }, (_, i) => `SELECT * FROM table_${i + 1}`); // Example queries
+    const totalQueries = queries.length;
+
+    // Set headers for Server-Sent Events
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    try {
+        for (let i = 0; i < totalQueries; i++) {
+            // Simulate query execution
+            await executeQuery(queries[i]);
+            console.log(`Query ${i + 1} executed.`);
+
+            // Send progress update every 5 queries
+            if ((i + 1) % 5 === 0 || i + 1 === totalQueries) {
+                const progress = Math.round(((i + 1) / totalQueries) * 100);
+                res.write(`data: ${JSON.stringify({ progress })}\n\n`);
+            }
+        }
+
+        // Send final success message
+        res.write(`data: ${JSON.stringify({ progress: 100, message: "All queries executed successfully" })}\n\n`);
+        res.end();
+    } catch (error) {
+        console.error("Error executing queries:", error);
+        res.write(`data: ${JSON.stringify({ error: "An error occurred while executing queries" })}\n\n`);
+        res.end();
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const QueryLoader = () => {
+    const [loader, setLoader] = useState("0%");
+    const [variables] = useState({
+        var1: "value1",
+        var2: "value2",
+        var3: "value3",
+        var4: "value4",
+        var5: "value5"
+    });
+
+    useEffect(() => {
+        const fetchProgress = async () => {
+            // Send the variables to the backend before establishing SSE
+            await axios.post('/DatabaseHealthCheckReports', variables);
+
+            // Initialize SSE for progress updates
+            const eventSource = new EventSource('/DatabaseHealthCheckReports');
+
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.progress) {
+                    console.log(`Progress: ${data.progress}%`);
+                    setLoader(`${data.progress}%`);
+                }
+
+                if (data.progress === 100) {
+                    console.log("All queries executed successfully!");
+                    eventSource.close();
+                }
+
+                if (data.error) {
+                    console.error("Error:", data.error);
+                    eventSource.close();
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error("EventSource error:", error);
+                eventSource.close();
+            };
+        };
+
+        fetchProgress();
+    }, [variables]);
+
+    return (
+        <div>
+            <h1>Query Execution Progress</h1>
+            <div style={{ width: '300px', height: '30px', border: '1px solid black' }}>
+                <div
+                    style={{
+                        width: loader,
+                        height: '100%',
+                        backgroundColor: 'green',
+                        textAlign: 'center',
+                        color: 'white',
+                    }}
+                >
+                    {loader}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default QueryLoader;
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState } from 'react';
 
 const App = () => {
