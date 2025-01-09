@@ -1,4 +1,205 @@
-
+[
+  {
+    "tag": "general_help",
+    "patterns": [
+      "I need help with Oracle.",
+      "Can someone assist me with Oracle Database?",
+      "Where can I find help for Oracle?",
+      "Who can help me with database-related issues?",
+      "How can I solve my Oracle problems?",
+      "Is there a guide for Oracle Database help?"
+    ],
+    "responses": [
+      "You can consult the official Oracle documentation for help.",
+      "Reach out to the Oracle support team for assistance.",
+      "Try searching Oracle forums or Stack Overflow for answers.",
+      "Contact your organization's DBA for Oracle-related issues.",
+      "Explore Oracle tutorials available online for step-by-step guides.",
+      "Use tools like SQL Developer to debug your Oracle problems.",
+      "Refer to Oracle training programs to enhance your skills."
+    ]
+  },
+  {
+    "tag": "page_reference",
+    "patterns": [
+      "Which page should I refer to for Oracle documentation?",
+      "Where can I find Oracle guides?",
+      "What are the best resources for Oracle?",
+      "Is there a specific site for Oracle tutorials?",
+      "How can I access Oracle's online resources?",
+      "Where can I find Oracle FAQs?"
+    ],
+    "responses": [
+      "Refer to the official Oracle documentation at https://docs.oracle.com/.",
+      "Oracle's developer hub offers detailed guides for all products.",
+      "Visit Oracle Learning Library for free tutorials and resources.",
+      "You can check Oracle forums and community pages for FAQs.",
+      "Find step-by-step instructions on Oracle's YouTube channel.",
+      "Use Oracle's blog for insights on new updates and best practices.",
+      "Join Oracle user groups for access to shared resources."
+    ]
+  },
+  {
+    "tag": "team_reference",
+    "patterns": [
+      "Which team should I contact for Oracle Database issues?",
+      "Who handles database-related queries?",
+      "Is there a specific team for database support?",
+      "Who should I talk to about Oracle performance?",
+      "How do I contact the DBA team?",
+      "Is there a team for Oracle troubleshooting?"
+    ],
+    "responses": [
+      "Contact your Database Administration (DBA) team for issues.",
+      "Reach out to the Oracle vendor support team for critical problems.",
+      "For internal queries, connect with the database development team.",
+      "Speak to your system architect for performance-related concerns.",
+      "Use the Oracle Support portal to log a support ticket.",
+      "Collaborate with your IT department for troubleshooting database issues.",
+      "Join team meetings to discuss ongoing Oracle-related challenges."
+    ]
+  },
+  {
+    "tag": "database_choice",
+    "patterns": [
+      "Which database is better for my project?",
+      "Should I use Oracle or MySQL?",
+      "What is the best database for large-scale projects?",
+      "Is Oracle suitable for small applications?",
+      "What database should I use for cloud applications?",
+      "How do I choose the right database for my requirements?"
+    ],
+    "responses": [
+      "Oracle is ideal for large-scale and enterprise-level projects.",
+      "MySQL is lightweight and suitable for smaller-scale applications.",
+      "Consider PostgreSQL for open-source, advanced SQL features.",
+      "For high availability, Oracle RAC is a great choice.",
+      "Choose Oracle Autonomous Database for cloud-native solutions.",
+      "Analyze your project's scalability, cost, and performance needs.",
+      "Use a trial version to test the database suitability before deciding."
+    ]
+  },
+  {
+    "tag": "error_handling",
+    "patterns": [
+      "How do I debug Oracle errors?",
+      "What should I do if I encounter ORA errors?",
+      "How can I fix SQL syntax errors?",
+      "What are common Oracle error codes?",
+      "How do I handle runtime errors in Oracle?",
+      "Is there a tool for Oracle error resolution?"
+    ],
+    "responses": [
+      "Use Oracle SQL Developer to debug and analyze errors.",
+      "Refer to the Oracle Error Messages guide for detailed solutions.",
+      "Common ORA errors can be resolved by fixing syntax or permissions.",
+      "Use the 'SHOW ERRORS' command to identify issues in PL/SQL code.",
+      "Log errors and escalate to your DBA if needed.",
+      "Check your database logs for detailed error messages.",
+      "Consult Oracle support for critical or unresolved errors."
+    ]
+  },
+  {
+    "tag": "performance_tuning",
+    "patterns": [
+      "How can I improve database performance?",
+      "What are the best practices for optimizing SQL queries?",
+      "How do I reduce query execution time?",
+      "What is Oracle's approach to performance tuning?",
+      "How do I index a table for better performance?",
+      "What tools are available for database tuning?"
+    ],
+    "responses": [
+      "Use Oracle's Automatic Database Diagnostic Monitor (ADDM).",
+      "Index your tables and avoid using SELECT * in queries.",
+      "Analyze query execution plans to identify slow operations.",
+      "Partition large tables to improve query performance.",
+      "Use Oracle Enterprise Manager for database monitoring.",
+      "Limit the use of nested queries and joins for faster execution.",
+      "Regularly update database statistics to maintain performance."
+    ]
+  },
+  {
+    "tag": "tools_usage",
+    "patterns": [
+      "What are the tools for Oracle Database development?",
+      "Which IDE is best for working with Oracle?",
+      "Are there tools for Oracle query optimization?",
+      "Can you recommend tools for Oracle PL/SQL development?",
+      "How do I use SQL Developer with Oracle?",
+      "What third-party tools work with Oracle?"
+    ],
+    "responses": [
+      "Popular tools include Oracle SQL Developer, Toad, and PL/SQL Developer.",
+      "Use Oracle Enterprise Manager for advanced database management.",
+      "Try DataGrip for a third-party database IDE.",
+      "SQLcl is a command-line tool for running SQL and PL/SQL scripts.",
+      "DBeaver is an excellent open-source database management tool.",
+      "Toad for Oracle is great for query building and optimization.",
+      "Experiment with tools to find one that suits your workflow."
+    ]
+  },
+  {
+    "tag": "data_migration",
+    "patterns": [
+      "How do I migrate MySQL data to Oracle?",
+      "What tools are available for database migration?",
+      "Is there a guide for migrating data to Oracle?",
+      "How do I move my database to Oracle Cloud?",
+      "What is the best practice for Oracle data migration?",
+      "Can I automate data migration in Oracle?"
+    ],
+    "responses": [
+      "Use Oracle Data Pump for data migration between Oracle databases.",
+      "SQL Developer supports MySQL to Oracle data migration.",
+      "For cloud migration, use Oracle GoldenGate or Oracle Cloud Migration tools.",
+      "Plan your migration carefully to avoid downtime.",
+      "Test the migration process in a staging environment first.",
+      "Follow the Oracle Database Migration Guide for best practices.",
+      "Use ETL tools like Talend for advanced data migration workflows."
+    ]
+  },
+  {
+    "tag": "backup_restore",
+    "patterns": [
+      "How do I back up my Oracle Database?",
+      "What is the process to restore data in Oracle?",
+      "Can you explain database recovery methods?",
+      "How does RMAN work for Oracle backups?",
+      "What tools can I use for database backups?",
+      "Is there an automated way to schedule backups in Oracle?"
+    ],
+    "responses": [
+      "Use RMAN (Recovery Manager) for reliable database backups.",
+      "Oracle Enterprise Manager offers backup and recovery features.",
+      "Schedule regular backups using cron jobs or Oracle Scheduler.",
+      "Store backups on cloud or remote servers for disaster recovery.",
+      "Follow Oracle's Backup and Recovery User's Guide for detailed steps.",
+      "Validate your backups regularly to ensure data integrity.",
+      "Test the restoration process in a controlled environment."
+    ]
+  },
+  {
+    "tag": "version_comparison",
+    "patterns": [
+      "What are the differences between Oracle 11g and 19c?",
+      "Which Oracle version is best for my needs?",
+      "What are the key features of Oracle 19c?",
+      "How does Oracle 12c compare to 19c?",
+      "Should I upgrade from Oracle 11g to 19c?",
+      "What are the advantages of using the latest Oracle version?"
+    ],
+    "responses": [
+      "Oracle 19c offers better performance, scalability, and security than 11g.",
+      "The 12c version introduced multitenant architecture, while 19c enhanced it.",
+      "Oracle 19c includes features like JSON support and automatic indexing.",
+      "19c is the long-term support release recommended for enterprises.",
+      "Upgrading to 19c ensures compatibility with modern systems.",
+      "Check Oracle's Release Notes for detailed version comparisons.",
+      "Consider your project's needs before deciding to upgrade."
+    ]
+  }
+]
 const express = require('express');
 const app = express();
 const PORT = 3000;
