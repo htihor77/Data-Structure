@@ -1,4 +1,91 @@
+Output.push(
+  <div style={{ color: "green", marginLeft: "10px", fontSize: "large", fontWeight: "780" }}>
+    {message}
+  </div>
+);
 
+Output.push(
+  <table key={index} style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
+    <thead>
+      <tr>
+        {keys.map((key) => (
+          <th
+            key={key}
+            style={{
+              border: "2px solid #ada",
+              padding: "8px",
+              backgroundColor: "#F2F2F2",
+              color: "#625395",
+              fontSize: "12px",
+              textAlign: "left",
+            }}
+          >
+            {key}
+          </th>
+        ))}
+        <th>
+          <input
+            type="checkbox"
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              group.rows.forEach((item) => {
+                item.selected = isChecked;
+              });
+              setOutput([...Output]); // Re-render with updated selection
+            }}
+          />
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {group.rows.map((item, rowIndex) => (
+        <tr key={rowIndex}>
+          {keys.map((key) => (
+            <td
+              key={key}
+              style={{
+                border: "1px solid #ddd",
+                padding: "8px",
+                textAlign: "left",
+              }}
+            >
+              {typeof item[key] === "number" ? item[key].toFixed(1) : item[key]}
+            </td>
+          ))}
+          <td>
+            <input
+              type="checkbox"
+              checked={item.selected || false}
+              onChange={(e) => {
+                item.selected = e.target.checked;
+                setOutput([...Output]); // Re-render with updated selection
+              }}
+            />
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+// Single button to kill selected items
+Output.push(
+  <button
+    className="btn btn-primary btn-block"
+    onClick={() => {
+      const selectedItems = group.rows.filter((item) => item.selected);
+      selectedItems.forEach((item) => {
+        if (!killedItems[item.SID]) {
+          killProcess(item.SID);
+          killedItems[item.SID] = true;
+        }
+      });
+      setOutput([...Output]); // Re-render with updated state
+    }}
+  >
+    Kill Selected
+  </button>
+);
 Here's an updated email draft based on the details you provided:
 
 
