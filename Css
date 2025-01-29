@@ -1,4 +1,46 @@
+import React, { useState } from "react";
+import { Dropdown } from "primereact/dropdown"; // PrimeReact Dropdown
+import { InputText } from "primereact/inputtext"; // PrimeReact Text Input
 
+const FormInputDropdown = ({ name, options = [], onOptionChanged, disabled }) => {
+    const [selectedValue, setSelectedValue] = useState(null);
+    const [inputValue, setInputValue] = useState("");
+
+    const handleDropdownChange = (e) => {
+        setSelectedValue(e.value);
+        setInputValue(e.value); // Update input field as well
+        if (onOptionChanged) onOptionChanged(e.value);
+    };
+
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value);
+        setSelectedValue(null); // Clear dropdown selection if user types manually
+    };
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <Dropdown
+                value={selectedValue}
+                options={options.map(item => ({ label: item, value: item }))}
+                onChange={handleDropdownChange}
+                placeholder="Select an option"
+                className="p-dropdown"
+                disabled={disabled}
+                showClear
+                style={{ marginBottom: "8px" }}
+            />
+            <InputText
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Or type manually"
+                className="p-inputtext"
+                disabled={disabled}
+            />
+        </div>
+    );
+};
+
+export default FormInputDropdown;
 
 import React from 'react';
 import Select from 'react-select';
