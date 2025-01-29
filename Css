@@ -1,3 +1,70 @@
+
+
+import React from 'react';
+import Select from 'react-select';
+import { Controller } from 'react-hook-form';
+
+const FormInputDropdown = (props) => {
+    const {
+        control,
+        name,
+        label,
+        options = [],
+        placeholder = "Select or type...",
+        allowCustomInput = true,
+        required = false,
+        isDisabled = false
+    } = props;
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {label && <label className="form-label">{label}</label>}
+            <Controller
+                name={name}
+                control={control}
+                rules={{ required }}
+                render={({ field }) => {
+                    const handleChange = (selectedOption) => {
+                        if (allowCustomInput && typeof selectedOption === 'string') {
+                            field.onChange({ label: selectedOption, value: selectedOption });
+                        } else {
+                            field.onChange(selectedOption);
+                        }
+                    };
+
+                    return (
+                        <Select
+                            {...field}
+                            options={options}
+                            isClearable
+                            isDisabled={isDisabled}
+                            placeholder={placeholder}
+                            onChange={handleChange}
+                            onInputChange={(inputValue, { action }) => {
+                                if (allowCustomInput && action === "input-change") {
+                                    field.onChange({ label: inputValue, value: inputValue });
+                                }
+                            }}
+                        />
+                    );
+                }}
+            />
+        </div>
+    );
+};
+
+export default FormInputDropdown;
+
+
+
+
+
+
+
+
+
+
+
 [
   {
     "tag": "general_help",
