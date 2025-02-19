@@ -1,3 +1,25 @@
+
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import RecycleBin from './RecycleBin';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/recycle-bin" element={<RecycleBin />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+
 import React, { useState } from "react";
 import { Dropdown } from "primereact/dropdown"; // PrimeReact Dropdown
 import { InputText } from "primereact/inputtext"; // PrimeReact Text Input
