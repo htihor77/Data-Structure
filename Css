@@ -11,7 +11,15 @@
     verticalAlign: 'middle'
   }} 
 />
+const handleMouseEnter = (e) => {
+  e.target.nextSibling.style.visibility = 'visible';
+  e.target.nextSibling.style.opacity = 1;
+};
 
+const handleMouseLeave = (e) => {
+  e.target.nextSibling.style.visibility = 'hidden';
+  e.target.nextSibling.style.opacity = 0;
+};
 
 
 
