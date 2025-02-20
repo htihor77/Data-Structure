@@ -1,3 +1,95 @@
+
+import React, { useState } from 'react';
+
+const renderColumn1 = (columnData) => {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleRecycleClick = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  return (
+    <div style={{ width: '68%' }}>
+      {columnData.map((group, index) => (
+        <div key={index}>
+          {group.header === "Recycle" ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ ...headerStyle, marginRight: '10px' }}>
+                {group.header}
+              </span>
+              <img
+                src="https://icon-library.com/images/info-icon/info-icon-24.jpg"
+                alt="info"
+                style={{ 
+                  width: '20px', 
+                  cursor: 'pointer' 
+                }}
+                onClick={handleRecycleClick}
+              />
+            </div>
+          ) : (
+            <div style={headerStyle}>{group.header}</div>
+          )}
+
+          {group.header === "Tablespace Usage >80%" && chartContent1}
+          {group.header === "Blockers" && group.rows.length === 0 && (
+            <div style={{ color: "Green" }}>
+              <h5>No Blockers detected</h5>
+            </div>
+          )}
+          {group.header === "Long Runners" && group.rows.length === 0 && (
+            <div style={{ color: "Green" }}>
+              <h5>No Long Runners detected</h5>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Modal Popup */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: 'white',
+          padding: '20px',
+          boxShadow: '0px 0px 10px rgba(0,0,0,0.3)',
+          zIndex: '1000'
+        }}>
+          <h3>Recycle Bin Details</h3>
+          <p>Here are the details of the recycle bin usage...</p>
+          <button onClick={closeModal}>Close</button>
+        </div>
+      )}
+
+      {/* Modal Overlay */}
+      {showModal && (
+        <div 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: '999'
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+
+
+
+
 You can conditionally render a styled button-like link for the "Recycle" header while keeping the default style for the others. Here's how to do it:
 
 const renderColumn1 = (columnData) => (
