@@ -1,3 +1,20 @@
+<img 
+  src={redirectIcon} 
+  alt="Redirect" 
+  onClick={() => window.location.href = 'https://your-target-url.com'}
+  onMouseEnter={handleMouseEnter}
+  onMouseLeave={handleMouseLeave}
+  style={{
+    width: '15px',
+    cursor: 'pointer',
+    marginLeft: '8px',
+    verticalAlign: 'middle'
+  }} 
+/>
+
+
+
+
 {group.header === "Recycle" && (
   <div style={{ display: 'inline-block', position: 'relative' }}>
     <img 
