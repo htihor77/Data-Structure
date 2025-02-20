@@ -1,4 +1,73 @@
+import React, { useState } from 'react';
+import infoIcon from './path/to/image.png'; // Import your image
 
+const renderColumn1 = (columnData) => {
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleIconClick = (e) => {
+    e.preventDefault(); // Prevent the default anchor action
+    setShowPopup(!showPopup);
+  };
+
+  return (
+    <div style={{ width: '68%' }}>
+      {columnData.map((group, index) => (
+        <div key={index} style={{ position: 'relative' }}>
+          {group.header === "Recycle" ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ ...headerStyle, marginRight: '10px' }}>
+                {group.header}
+              </span>
+              <a href="#" onClick={handleIconClick}>
+                <img 
+                  src={infoIcon} 
+                  alt="Info" 
+                  style={{ 
+                    width: '20px', 
+                    cursor: 'pointer' 
+                  }} 
+                />
+              </a>
+
+              {/* Pop-up near the header */}
+              {showPopup && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '0',
+                  backgroundColor: 'white',
+                  border: '1px solid #ccc',
+                  padding: '10px',
+                  boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                  zIndex: '10',
+                  marginTop: '5px',
+                  width: '200px'
+                }}>
+                  <h4>Recycle Bin Details</h4>
+                  <p>This section shows the usage of the recycle bin...</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={headerStyle}>{group.header}</div>
+          )}
+
+          {group.header === "Tablespace Usage >80%" && chartContent1}
+          {group.header === "Blockers" && group.rows.length === 0 && (
+            <div style={{ color: "Green" }}>
+              <h5>No Blockers detected</h5>
+            </div>
+          )}
+          {group.header === "Long Runners" && group.rows.length === 0 && (
+            <div style={{ color: "Green" }}>
+              <h5>No Long Runners detected</h5>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 import React, { useState } from 'react';
 
 const renderColumn1 = (columnData) => {
