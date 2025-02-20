@@ -1,3 +1,42 @@
+{group.header === "Recycle" && (
+  <div style={{ display: 'inline-block', position: 'relative' }}>
+    <img 
+      src={redirectIcon} 
+      alt="Redirect" 
+      onClick={() => window.location.href = 'https://your-target-url.com'}
+      style={{
+        width: '15px',
+        cursor: 'pointer',
+        marginLeft: '8px',
+        verticalAlign: 'middle'
+      }} 
+    />
+    <span 
+      style={{
+        visibility: 'hidden',
+        backgroundColor: 'black',
+        color: '#fff',
+        textAlign: 'center',
+        borderRadius: '4px',
+        padding: '5px',
+        position: 'absolute',
+        zIndex: 1,
+        bottom: '125%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        opacity: 0,
+        transition: 'opacity 0.3s',
+        whiteSpace: 'nowrap',
+        fontSize: '12px'
+      }}
+    >
+      Go to Recyclebin Details
+    </span>
+  </div>
+)}
+
+
+
 .tooltip-text {
   visibility: hidden;
   background-color: black;
