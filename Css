@@ -1,3 +1,56 @@
+You can conditionally render a styled button-like link for the "Recycle" header while keeping the default style for the others. Here's how to do it:
+
+const renderColumn1 = (columnData) => (
+  <div style={{ width: '68%' }}>
+    {columnData.map((group, index) => (
+      <div key={index}>
+        {group.header === "Recycle" ? (
+          <div 
+            style={{
+              ...headerStyle, 
+              padding: '10px 20px', 
+              backgroundColor: '#f0f0f0', 
+              borderRadius: '5px', 
+              cursor: 'pointer',
+              display: 'inline-block',
+              color: '#007bff',
+              textDecoration: 'underline'
+            }}
+            onClick={() => handleRecycleClick()}
+          >
+            {group.header}
+          </div>
+        ) : (
+          <div style={headerStyle}>{group.header}</div>
+        )}
+
+        {group.header === "Tablespace Usage >80%" && chartContent1}
+        {group.header === "Blockers" && group.rows.length === 0 && (
+          <div style={{ color: "Green" }}>
+            <h5>No Blockers detected</h5>
+          </div>
+        )}
+        {group.header === "Long Runners" && group.rows.length === 0 && (
+          <div style={{ color: "Green" }}>
+            <h5>No Long Runners detected</h5>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
+In this version:
+
+If group.header is "Recycle", a clickable div styled like a link/button is rendered.
+
+It includes more padding and a cursor change to enhance the button-like appearance.
+
+It also uses onClick to trigger handleRecycleClick(), which you can define for navigation or other actions.
+
+For all other headers, the default style is applied.
+
+
 
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import RecycleBin from './RecycleBin';
