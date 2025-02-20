@@ -1,3 +1,28 @@
+
+{columnData.map((group, index) => (
+  <div key={index}>
+    <div style={headerStyle}>
+      {group.header}
+      
+      {group.header === "Recycle" && (
+        <img 
+          src={redirectIcon} 
+          alt="Redirect" 
+          onClick={() => window.location.href = 'https://your-target-url.com'}
+          style={{
+            width: '15px',     // Adjust the size as needed
+            cursor: 'pointer',
+            marginLeft: '8px', // Space between text and icon
+            verticalAlign: 'middle' // Aligns the icon with the text
+          }} 
+        />
+      )}
+    </div>
+  </div>
+))}
+
+
+
 import React, { useState } from 'react';
 import infoIcon from './path/to/image.png'; // Import your image
 
