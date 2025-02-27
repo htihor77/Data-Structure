@@ -50,6 +50,58 @@ const parseConsoleOutput = (data) => {
 
     return { ipDetails, jobStatus };
 };
+
+
+
+
+
+
+const getConsoleText = async (jenkinsURL) => {
+    let payload = { jenkinsURL };
+    setJenkinsDataLoader(true);
+
+    try {
+        let res = await axiosConfig.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {});
+        console.log("Jenkins Data:", res.data);
+
+        if (res.data) {
+            const { ipDetails, jobStatus } = parseConsoleOutput(res.data);
+            setJenkinsData(ipDetails);
+            setJobStatus(jobStatus);
+        }
+    } catch (error) {
+        console.error("Error fetching console text:", error);
+    }
+
+    setJenkinsDataLoader(false);
+};
+
+
+return (
+    <div>
+        <h3>Job Status: {jobStatus}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Datacenter</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {jenkinsData.map((item, index) => (
+                    <tr key={index}>
+                        <td>{item.ip}</td>
+                        <td>{item.datacenter}</td>
+                        <td>{item.status}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+);
+
+
 const parseConsoleOutput = (data) => {
     // Extract relevant data using regex or string manipulation
     const ipDetails = [];
