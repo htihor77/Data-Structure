@@ -1,3 +1,84 @@
+
+const parseLogData = (logData) => {
+  // Extracting the relevant section
+  const debugSection = logData.match(/TASK debug[\s\S]*?PLAY RECAP/);
+  if (!debugSection) return <div>No relevant data found</div>;
+
+  const relevantData = debugSection[0];
+  const ipSections = relevantData.split('OK ['); // Split by each OK section
+  const tables = [];
+
+  ipSections.forEach(section => {
+    // Extracting IP Address
+    const ipMatch = section.match(/([0-9.]+)/);
+    const ip = ipMatch ? ipMatch[1] : null;
+    if (!ip) return; // Skip if no IP is found
+
+    // Extracting Datacenter Name
+    const datacenterMatch = section.match(/"Datacenters_(.*?)"/);
+    const datacenter = datacenterMatch ? datacenterMatch[1] : 'Unknown Datacenter';
+
+    // Extracting Status Rows
+    const rows = [];
+    const statusRows = section.match(/"UN.*?"/g);
+    if (statusRows) {
+      statusRows.forEach(row => {
+        const columns = row.replace(/"/g, '').split(/\s+/).filter(col => col);
+        rows.push(columns);
+      });
+    } else {
+      rows.push(['No data available']);
+    }
+
+    // Creating Table for each IP
+    tables.push(
+      <table key={ip} border="1" style={{ margin: '10px', borderCollapse: 'collapse', width: '80%' }}>
+        <caption style={{ fontWeight: 'bold', padding: '5px' }}>{`IP: ${ip} | Datacenter: ${datacenter}`}</caption>
+        <thead>
+          <tr style={{ backgroundColor: '#f2f2f2' }}>
+            <th>Status</th>
+            <th>Address</th>
+            <th>Load</th>
+            <th>Tokens</th>
+            <th>Owns</th>
+            <th>Host ID</th>
+            <th>Rack</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((columns, index) => (
+            <tr key={index}>
+              {columns.map((col, i) => (
+                <td key={i} style={{ padding: '5px', textAlign: 'center' }}>{col}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  });
+
+  // Extracting Final Status
+  const finalStatusMatch = logData.match(/Finished: (.*?)$/m);
+  const finalStatus = finalStatusMatch ? finalStatusMatch[1] : 'Unknown Status';
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <h2>Task Debug Details</h2>
+      {tables.length > 0 ? tables : <div>No IP Data Found</div>}
+      <h3 style={{ color: finalStatus === 'SUCCESS' ? 'green' : 'red' }}>Final Status: {finalStatus}</h3>
+    </div>
+  );
+};
+
+export default parseLogData;
+
+
+
+
+
+
+
 Alright, I see the pattern more clearly now:
 
 The Datacenter starts with a double quote and the word Datacenter, followed by the name and a dash (-) at the end.
