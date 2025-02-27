@@ -1,4 +1,115 @@
+import React, { useState, useEffect } from 'react';
 
+// Sample data for testing (replace with actual data from s.data)
+const sampleData = `
+TASK [debug] *******************************************************************
+ok: [144.70.1.48] => {
+    "output.stdout_lines": [
+        "Datacenter: B2BBILLING-EAST-1",
+        "Status=Up/Down,",
+        "/ State=Normal/Leaving/Joining/Moving/Stopped,",
+        "UN 144.70.3.162 221.47 GiB 16 ? 71651c35-74db-4d93-9997-8fb39410f39c RAC2",
+        "UN 144.70.3.162 221.27 GiB 16 ? 312435c27d0 RAC3",
+        "Datacenter: B2BBILLING-WEST-2",
+        "Status=Up/Down,",
+        "/ State=Normal/Leaving/Joining/Moving/Stopped,",
+        "UN 144.70.39.12 271.67 GiB 16 ? 4cf2c994-40c6-4d7b-80a8-797899c60a96 RAC3",
+        "UN 144.70.39.13 245.64 GiB 16 ? 09919fbb-b7a8-40bc-90e7-d8ee7e3e3775 RAC2",
+        "Note: Non-system keyspaces don't have the same replication settings.",
+    ]
+}
+PLAY RECAP *********************************************************************
+144.70.1.48               : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+`;
+
+const TaskOutput = () => {
+  const [parsedData, setParsedData] = useState([]);
+  const [overallStatus, setOverallStatus] = useState('Loading...');
+
+  // Function to parse the console output
+  const parseConsoleOutput = (data) => {
+    const lines = data.split('\n');
+    const datacenters = [];
+    let currentDatacenter = null;
+
+    lines.forEach((line) => {
+      line = line.trim();
+
+      // Identify Datacenter
+      if (line.startsWith('Datacenter:')) {
+        currentDatacenter = {
+          name: line.split(':')[1].trim(),
+          nodes: []
+        };
+        datacenters.push(currentDatacenter);
+      }
+      // Identify Node Information
+      else if (/^(UN|DN|\?)/.test(line) && currentDatacenter) {
+        const parts = line.split(/\s+/);
+        currentDatacenter.nodes.push({
+          status: parts[0],
+          address: parts[1],
+          load: parts[2] + ' ' + parts[3],
+          tokens: parts[4],
+          owns: parts[5],
+          hostId: parts[6],
+          rack: parts[7]
+        });
+      }
+      // Check for overall status in PLAY RECAP
+      else if (line.includes('PLAY RECAP')) {
+        const statusLine = lines[lines.indexOf(line) + 1];
+        setOverallStatus(statusLine.includes('failed=0') ? 'Finished: SUCCESS' : 'Finished: FAILURE');
+      }
+    });
+
+    setParsedData(datacenters);
+  };
+
+  // Use Effect to parse the data on component mount
+  useEffect(() => {
+    parseConsoleOutput(sampleData); // Replace with actual data (e.g., from s.data)
+  }, []);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ textAlign: 'right' }}>{overallStatus}</h2>
+      {parsedData.map((dc, dcIndex) => (
+        <div key={dcIndex} style={{ marginBottom: '30px' }}>
+          <h3>{dc.name}</h3>
+          <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Address</th>
+                <th>Load</th>
+                <th>Tokens</th>
+                <th>Owns</th>
+                <th>Host ID</th>
+                <th>Rack</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dc.nodes.map((node, nodeIndex) => (
+                <tr key={nodeIndex}>
+                  <td>{node.status}</td>
+                  <td>{node.address}</td>
+                  <td>{node.load}</td>
+                  <td>{node.tokens}</td>
+                  <td>{node.owns}</td>
+                  <td>{node.hostId}</td>
+                  <td>{node.rack}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default TaskOutput;
 Here’s the revised version with a clearer structure, introducing Recycle Bin Purge first and then explaining the Deep Link as a dedicated section:
 
 
