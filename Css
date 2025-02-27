@@ -1,3 +1,91 @@
+
+const parseConsoleOutput = (data) => {
+    // Extract relevant data using regex or string manipulation
+    const ipDetails = [];
+    const lines = data.split("\n");
+    let jobStatus = "Loading...";
+
+    lines.forEach(line => {
+        // Extract IP, Datacenter, Status, etc.
+        if (line.includes("Datacenter")) {
+            const datacenter = line.split(":")[1].trim();
+            ipDetails.push({ datacenter });
+        }
+        if (line.match(/(\d{1,3}\.){3}\d{1,3}/)) {
+            const parts = line.split(" ");
+            const ip = parts[0];
+            const status = parts.includes("UN") ? "Up" : "Down";
+            ipDetails[ipDetails.length - 1] = {
+                ...ipDetails[ipDetails.length - 1],
+                ip,
+                status
+            };
+        }
+        if (line.includes("Finished:")) {
+            jobStatus = line.split(":")[1].trim();
+        }
+    });
+
+    return { ipDetails, jobStatus };
+};
+
+
+const getConsoleText = async (jenkinsURL) => {
+    let payload = { jenkinsURL };
+    setJenkinsDataLoader(true);
+
+    let res = await axiosConfig.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {});
+
+    if (res.data) {
+        const { ipDetails, jobStatus } = parseConsoleOutput(res.data);
+        setJenkinsData(ipDetails);
+        setJobStatus(jobStatus);
+    }
+
+    setJenkinsDataLoader(false);
+};
+
+
+return (
+    <div>
+        <h3>Job Status: {jobStatus}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Datacenter</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {jenkinsData.map((item, index) => (
+                    <tr key={index}>
+                        <td>{item.ip}</td>
+                        <td>{item.datacenter}</td>
+                        <td>{item.status}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <img 
   src={redirectIcon} 
   alt="Redirect" 
