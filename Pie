@@ -1,3 +1,260 @@
+Alright, I see the pattern more clearly now:
+
+The Datacenter starts with a double quote and the word Datacenter, followed by the name and a dash (-) at the end.
+
+The Node Info lines also start with a double quote, followed by some spaces, then the node status (UN, DN, or ?) and the details.
+
+
+Updated Plan:
+
+1. Datacenter Identification:
+
+Look for lines starting with " followed by Datacenter.
+
+
+
+2. Node Information Identification:
+
+Look for lines starting with " followed by at least two spaces, then the status (UN, DN, ?).
+
+
+
+3. Grouping:
+
+Group nodes under the correct Datacenter and IP Address.
+
+
+
+4. Dynamic Tables:
+
+Display tables for each Datacenter under each IP Address.
+
+
+
+5. Overall Status:
+
+Display Finished: SUCCESS or Finished: FAILURE.
+
+
+
+
+
+---
+
+Sample Test Data:
+
+To ensure it works correctly, you can use this sample data:
+
+const sampleData = `
+TASK [debug] *****************************************
+ok: [144.70.1.48] => {
+    "output.stdout_lines": [
+        "Datacenter: B2BBILLING-EAST-1",
+        "",
+        "Status=Up/Down",
+        "",
+        "  Address        Load       Tokens  Owns (effective)  Host ID                               Rack",
+        "  UN  144.70.3.162  221.47 GiB  16   ?               71651053-74db-4d93-9997-8fb39410f39c  RAC2",
+        "  UN  144.70.2.48   227.72 GiB  16   ?               1c274b02-217c-4c87-8522-313425c7f0d0  RAC3",
+        "",
+        "Datacenter: B2BBILLING-WEST-2",
+        "",
+        "Status=Up/Down",
+        "",
+        "  Address        Load       Tokens  Owns (effective)  Host ID                               Rack",
+        "  UN  144.70.39.10  165.66 GiB  16   ?               4cf9a6c9-439e-4879-be9e-7f566629b76e  RAC3",
+        "  UN  144.70.36.25  245.64 GiB  16   ?               09919ec4-88ac-90e7-d7ee93ee3775        RAC2"
+    ]
+}
+PLAY RECAP *******************************************
+144.70.1.48               : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+`;
+
+You can temporarily replace the getConsoleText function with this sample data to test.
+
+
+---
+
+Updated React Code:
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import nodeRedConfig from './nodeRedConfig'; // Adjust the path as needed
+
+const Task = () => {
+  const [jenkinsData, setJenkinsData] = useState('');
+  const [parsedData, setParsedData] = useState([]);
+  const [overallStatus, setOverallStatus] = useState('Loading...');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch Console Output
+  const getConsoleText = async (jenkinsURL) => {
+    let payload = { jenkinsURL };
+    setIsLoading(true);
+
+    try {
+      const res = await axios.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log("Jenkins Data:", res.data);
+      setJenkinsData(res.data);
+
+      // Parse the console output after fetching
+      parseConsoleOutput(res.data);
+    } catch (error) {
+      console.error('Error fetching console output:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to parse the console output
+  const parseConsoleOutput = (data) => {
+    const lines = data.split('\n');
+    const ipData = {};
+    let currentIP = null;
+    let currentDatacenter = null;
+    let startParsing = false;
+
+    lines.forEach((line) => {
+      line = line.trim();
+
+      // Start parsing after TASK [debug]
+      if (line.startsWith('TASK [debug]')) {
+        startParsing = true;
+        return;
+      }
+
+      // Stop parsing at PLAY RECAP
+      if (line.startsWith('PLAY RECAP')) {
+        startParsing = false;
+        const statusLine = lines[lines.indexOf(line) + 1];
+        setOverallStatus(statusLine.includes('failed=0') ? 'Finished: SUCCESS' : 'Finished: FAILURE');
+        return;
+      }
+
+      if (!startParsing) return;
+
+      // Get IP Address from ok: [IP]
+      if (line.startsWith('ok: [')) {
+        currentIP = line.match(/ok: (.*?)/)[1];
+        if (!ipData[currentIP]) {
+          ipData[currentIP] = [];
+        }
+        return;
+      }
+
+      // Identify Datacenter
+      if (line.startsWith('"Datacenter:')) {
+        currentDatacenter = {
+          name: line.split(':')[1].trim().replace('"', ''),
+          nodes: []
+        };
+        ipData[currentIP].push(currentDatacenter);
+        return;
+      }
+
+      // Identify Node Information
+      if (/^"\s{2,}(UN|DN|\?)/.test(line) && currentDatacenter) {
+        const parts = line.split(/\s+/);
+        currentDatacenter.nodes.push({
+          status: parts[1],
+          address: parts[2],
+          load: parts[3] + ' ' + parts[4],
+          tokens: parts[5],
+          owns: parts[6],
+          hostId: parts[7],
+          rack: parts[8]
+        });
+      }
+    });
+
+    setParsedData(ipData);
+  };
+
+  // Use Effect to trigger fetching console output
+  useEffect(() => {
+    // Use sample data for testing
+    parseConsoleOutput(sampleData);
+
+    // Uncomment for actual fetching
+    // getConsoleText('YOUR_JENKINS_URL_HERE');
+  }, []);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ textAlign: 'right' }}>{overallStatus}</h2>
+      {isLoading && <p>Loading...</p>}
+      {Object.entries(parsedData).map(([ip, datacenters]) => (
+        <div key={ip} style={{ marginBottom: '30px', border: '1px solid #ccc', padding: '10px' }}>
+          <h3>IP: {ip}</h3>
+          {datacenters.map((dc, dcIndex) => (
+            <div key={dcIndex} style={{ marginBottom: '20px' }}>
+              <h4>Datacenter: {dc.name}</h4>
+              <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Address</th>
+                    <th>Load</th>
+                    <th>Tokens</th>
+                    <th>Owns</th>
+                    <th>Host ID</th>
+                    <th>Rack</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dc.nodes.map((node, nodeIndex) => (
+                    <tr key={nodeIndex}>
+                      <td>{node.status}</td>
+                      <td>{node.address}</td>
+                      <td>{node.load}</td>
+                      <td>{node.tokens}</td>
+                      <td>{node.owns}</td>
+                      <td>{node.hostId}</td>
+                      <td>{node.rack}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Task;
+
+
+---
+
+Changes Made:
+
+1. Corrected Datacenter Matching:
+
+Now correctly matches lines starting with "Datacenter.
+
+
+
+2. Updated Node Info Matching:
+
+Matches lines starting with " followed by at least two spaces and then the status.
+
+
+
+3. Test Data Integration:
+
+Uses sampleData for quick testing.
+
+You can switch to live data by uncommenting getConsoleText().
+
+
+
+
+This version has been crafted to properly parse the console output and display the data in dynamic tables as required. Test it with your data, and let me know if you need more adjustments!
+
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
