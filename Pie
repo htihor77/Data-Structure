@@ -1,3 +1,139 @@
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import nodeRedConfig from './nodeRedConfig'; // Adjust import path as needed
+
+const Task = () => {
+  const [jenkinsData, setJenkinsData] = useState('');
+  const [parsedData, setParsedData] = useState([]);
+  const [overallStatus, setOverallStatus] = useState('Loading...');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch Console Output
+  const getConsoleText = async (jenkinsURL) => {
+    let payload = { jenkinsURL };
+    setIsLoading(true);
+
+    try {
+      const res = await axios.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log("Jenkins Data:", res.data);
+      setJenkinsData(res.data);
+
+      // Call the parser after data is set
+      parseConsoleOutput(res.data);
+    } catch (error) {
+      console.error('Error fetching console output:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to parse the console output
+  const parseConsoleOutput = (data) => {
+    const lines = data.split('\n');
+    const datacenters = [];
+    let currentDatacenter = null;
+    let startParsing = false;
+
+    lines.forEach((line) => {
+      line = line.trim();
+
+      // Start parsing after TASK [debug]
+      if (line.startsWith('TASK [debug]')) {
+        startParsing = true;
+        return;
+      }
+
+      // Stop parsing at PLAY RECAP
+      if (line.startsWith('PLAY RECAP')) {
+        startParsing = false;
+        const statusLine = lines[lines.indexOf(line) + 1];
+        setOverallStatus(statusLine.includes('failed=0') ? 'Finished: SUCCESS' : 'Finished: FAILURE');
+        return;
+      }
+
+      if (!startParsing) return;
+
+      // Identify Datacenter
+      if (line.startsWith('Datacenter:')) {
+        currentDatacenter = {
+          name: line.split(':')[1].trim(),
+          nodes: []
+        };
+        datacenters.push(currentDatacenter);
+      }
+      // Identify Node Information
+      else if (/^(UN|DN|\?)/.test(line) && currentDatacenter) {
+        const parts = line.split(/\s+/);
+        currentDatacenter.nodes.push({
+          status: parts[0],
+          address: parts[1],
+          load: parts[2] + ' ' + parts[3],
+          tokens: parts[4],
+          owns: parts[5],
+          hostId: parts[6],
+          rack: parts[7]
+        });
+      }
+    });
+
+    setParsedData(datacenters);
+  };
+
+  // Use Effect to trigger fetching console output
+  useEffect(() => {
+    // Call getConsoleText with the desired Jenkins URL
+    getConsoleText('YOUR_JENKINS_URL_HERE');
+  }, []);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ textAlign: 'right' }}>{overallStatus}</h2>
+      {isLoading && <p>Loading...</p>}
+      {parsedData.map((dc, dcIndex) => (
+        <div key={dcIndex} style={{ marginBottom: '30px' }}>
+          <h3>{dc.name}</h3>
+          <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Address</th>
+                <th>Load</th>
+                <th>Tokens</th>
+                <th>Owns</th>
+                <th>Host ID</th>
+                <th>Rack</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dc.nodes.map((node, nodeIndex) => (
+                <tr key={nodeIndex}>
+                  <td>{node.status}</td>
+                  <td>{node.address}</td>
+                  <td>{node.load}</td>
+                  <td>{node.tokens}</td>
+                  <td>{node.owns}</td>
+                  <td>{node.hostId}</td>
+                  <td>{node.rack}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Task;
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 
 // Sample data for testing (replace with actual data from s.data)
