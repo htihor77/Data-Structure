@@ -18,6 +18,104 @@ const parseJenkinsOutput = (output) => {
     if (parsing) {
       // Extract Data Center
       if (line.includes('"Datacenter":')) {
+        dataCenter = line.split('"Datacenter":')[1].trim().replace(/"|,|\\/g, '');
+      }
+
+      // Improved Node Information Extraction
+      // Flexible regex pattern to handle:
+      // - Leading and trailing quotes
+      // - Variable spaces
+      // - Special characters
+      const nodePattern = /^"?(\w{2})"?\s+([\d.]+)\s+([\d.]+ GB)\s+(\d+)\s+\?\s+([\w-]+)\s+(\w+)["|,]*$/;
+      const match = line.match(nodePattern);
+
+      if (match) {
+        const [, status, address, load, tokens, hostId, rack] = match;
+        tableData.push({
+          dataCenter,
+          status: status === 'UN' ? 'Up' : 'Down', // Mapping UN to Up, others to Down
+          address,
+          load,
+          tokens,
+          hostId,
+          rack,
+        });
+      }
+    }
+  });
+
+  return tableData;
+};
+
+const JenkinsOutputDisplay = ({ output }) => {
+  const tableData = parseJenkinsOutput(output);
+
+  return (
+    <div>
+      <h2>Jenkins Output Details</h2>
+      <table border="1" style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead>
+          <tr>
+            <th>Data Center</th>
+            <th>Status</th>
+            <th>Address</th>
+            <th>Load</th>
+            <th>Tokens</th>
+            <th>Host ID</th>
+            <th>Rack</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.length > 0 ? (
+            tableData.map((row, index) => (
+              <tr key={index}>
+                <td>{row.dataCenter}</td>
+                <td>{row.status}</td>
+                <td>{row.address}</td>
+                <td>{row.load}</td>
+                <td>{row.tokens}</td>
+                <td>{row.hostId}</td>
+                <td>{row.rack}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" style={{ textAlign: 'center' }}>No Data Found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+const parseJenkinsOutput = (output) => {
+  const lines = output.split('\n');
+  let dataCenter = '';
+  const tableData = [];
+  let parsing = false;
+
+  lines.forEach((line) => {
+    // Start parsing after "TASK [debug]"
+    if (line.includes('TASK [debug]')) {
+      parsing = true;
+    }
+
+    // Stop parsing at "PLAY RECAP"
+    if (line.includes('PLAY RECAP')) {
+      parsing = false;
+    }
+
+    if (parsing) {
+      // Extract Data Center
+      if (line.includes('"Datacenter":')) {
         dataCenter = line.split('"Datacenter":')[1].trim().replace(/"/g, '');
       }
 
