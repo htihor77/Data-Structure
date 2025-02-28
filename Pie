@@ -1,3 +1,38 @@
+<table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+  <thead>
+    <tr style="background-color: #f4f4f9; text-align: left; border-bottom: 2px solid #ccc;">
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Data Center</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Status</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Address</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Load</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Tokens</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Host ID</th>
+      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Rack</th>
+    </tr>
+  </thead>
+  <tbody>
+    {tableData.length > 0 ? (
+      tableData.map((row, index) => (
+        <tr key={index} style={`background-color: ${index % 2 === 0 ? '#ffffff' : '#f9f9f9'};`}>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.dataCenter}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.status}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.address}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.load}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.tokens}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.hostId}</td>
+          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.rack}</td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="7" style="text-align: center; padding: 10px;">No Data Found</td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
+
+
 const parseJenkinsOutput = (output) => {
   const lines = output.split('\n');
   let dataCenter = '';
