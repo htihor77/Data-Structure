@@ -1,4 +1,65 @@
-
+const value = [
+  {
+    dataCenter: "DC-01",
+    status: "UN",
+    address: "192.168.1.1",
+    load: "25%",
+    tokens: "1500",
+    owns: "45%",
+    hostId: "host-001",
+    rack: "rack-1"
+  },
+  {
+    dataCenter: "DC-02",
+    status: "DOWN",
+    address: "192.168.1.2",
+    load: "60%",
+    tokens: "1800",
+    owns: "55%",
+    hostId: "host-002",
+    rack: "rack-2"
+  },
+  {
+    dataCenter: "DC-03",
+    status: "UN",
+    address: "192.168.1.3",
+    load: "20%",
+    tokens: "1200",
+    owns: "40%",
+    hostId: "host-003",
+    rack: "rack-3"
+  },
+  {
+    dataCenter: "DC-04",
+    status: "CRITICAL",
+    address: "192.168.1.4",
+    load: "85%",
+    tokens: "2200",
+    owns: "60%",
+    hostId: "host-004",
+    rack: "rack-4"
+  },
+  {
+    dataCenter: "DC-05",
+    status: "UN",
+    address: "192.168.1.5",
+    load: "30%",
+    tokens: "1300",
+    owns: "42%",
+    hostId: "host-005",
+    rack: "rack-5"
+  },
+  {
+    dataCenter: "DC-06",
+    status: "DOWN",
+    address: "192.168.1.6",
+    load: "75%",
+    tokens: "2100",
+    owns: "58%",
+    hostId: "host-006",
+    rack: "rack-6"
+  }
+];
 <tbody>
   {value.length > 0 ? (
     value
