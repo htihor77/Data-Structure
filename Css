@@ -1,3 +1,36 @@
+
+
+<tbody>
+  {value.length > 0 ? (
+    value
+      .sort((a, b) => (a.status !== 'UN' ? -1 : b.status !== 'UN' ? 1 : 0))
+      .map((row, index) => (
+        <tr
+          key={index}
+          style={{
+            backgroundColor: row.status !== 'UN' ? '#ffcccc' : index % 2 === 0 ? '#ffffff' : '#f9f9f9'
+          }}
+        >
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.dataCenter}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.status}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.address}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.load}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.tokens}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.owns}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.hostId}</td>
+          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.rack}</td>
+        </tr>
+      ))
+  ) : (
+    <tr>
+      <td colSpan="8" style={{ textAlign: 'center' }}>No data available</td>
+    </tr>
+  )}
+</tbody>
+
+
+
+
 const parseConsoleOutput = (data) => {
     const ipDetails = [];
     const lines = data.split("\n");
