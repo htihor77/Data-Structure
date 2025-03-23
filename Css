@@ -1,4 +1,99 @@
+import React, { useState } from "react";
 
+const DataTable = ({ tableData }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <div>
+      {/* Button to open the modal */}
+      <button 
+        onClick={() => setShowModal(true)} 
+        style={{
+          padding: "10px 20px",
+          background: "#007BFF",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          borderRadius: "5px",
+          marginBottom: "10px"
+        }}
+      >
+        Show Data
+      </button>
+
+      {/* Modal Popup */}
+      {showModal && (
+        <div style={{
+          position: "fixed",
+          top: "0",
+          left: "0",
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: "1000"
+        }}>
+          <div style={{
+            background: "#fff",
+            padding: "20px",
+            width: "80%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            borderRadius: "10px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.2)"
+          }}>
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowModal(false)} 
+              style={{
+                float: "right",
+                background: "red",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                padding: "5px 10px",
+                borderRadius: "5px"
+              }}
+            >
+              ✖
+            </button>
+
+            {/* Data Table */}
+            {tableData.map((table, index) => (
+              <table key={index} border="1" style={{
+                marginBottom: "20px",
+                borderCollapse: "collapse",
+                width: "100%",
+                tableLayout: "fixed"
+              }}>
+                <tbody>
+                  {table.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex} 
+                        style={{ 
+                          background: rowIndex === 0 ? "#4CAF50" : rowIndex % 2 === 0 ? "#ffffff" : "#f9f9f9", 
+                          color: rowIndex === 0 ? "#ffffff" : "#000",
+                          fontWeight: rowIndex === 0 ? "bold" : "normal"
+                        }}>
+                      {row.filter(cell => cell.trim() !== "").map((cell, cellIndex) => (
+                        <td key={cellIndex} style={{ padding: "8px", border: "1px solid #ccc" }}>
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DataTable;
 
 {!loader && tableData.length > 0 && (
   <div>
