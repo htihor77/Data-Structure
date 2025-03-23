@@ -1,580 +1,71 @@
+const parseTables = (text) => {
+    const lines = text.split("\n");
+    let tables = [];
+    let currentTable = { header: [], rows: [] };
+    let isHeader = true;
+    let firstCase = true;
 
-
-<tbody>
-  {value.length > 0 ? (
-    value
-      .sort((a, b) => (a.status !== 'UN' ? -1 : b.status !== 'UN' ? 1 : 0))
-      .map((row, index) => (
-        <tr
-          key={index}
-          style={{
-            backgroundColor: row.status !== 'UN' ? '#ffcccc' : index % 2 === 0 ? '#ffffff' : '#f9f9f9'
-          }}
-        >
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.dataCenter}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.status}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.address}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.load}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.tokens}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.owns}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.hostId}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #ccc', fontSize: '13px', color: '#333' }}>{row.rack}</td>
-        </tr>
-      ))
-  ) : (
-    <tr>
-      <td colSpan="8" style={{ textAlign: 'center' }}>No data available</td>
-    </tr>
-  )}
-</tbody>
-
-
-
-
-const parseConsoleOutput = (data) => {
-    const ipDetails = [];
-    const lines = data.split("\n");
-    let isDebugSection = false;
-    let currentIP = null;
-    let jobStatus = "Loading...";
-
-    lines.forEach(line => {
-        // Start parsing when TASK [debug] is encountered
-        if (line.includes("TASK [debug]")) {
-            isDebugSection = true;
-        }
-
-        // Stop parsing at PLAY RECAP
-        if (line.includes("PLAY RECAP")) {
-            isDebugSection = false;
-        }
-
-        if (isDebugSection) {
-            // Extract IP, Datacenter, and Status dynamically
-            const ipMatch = line.match(/(\d{1,3}\.){3}\d{1,3}/);
-            if (ipMatch) {
-                currentIP = ipMatch[0];
-                ipDetails.push({
-                    ip: currentIP,
-                    datacenter: "",
-                    status: ""
-                });
-            }
-            
-            if (line.includes("Datacenter")) {
-                const datacenter = line.split(":")[1].trim();
-                if (currentIP) {
-                    ipDetails[ipDetails.length - 1].datacenter = datacenter;
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        
+        if (line.startsWith("------")) {
+            if (firstCase) {
+                if (i > 0) {
+                    currentTable.header.push(lines[i - 1].trim());
                 }
-            }
-
-            if (line.includes("Status")) {
-                const status = line.includes("UN") ? "Up" : "Down";
-                if (currentIP) {
-                    ipDetails[ipDetails.length - 1].status = status;
+                firstCase = false;
+            } else {
+                if (currentTable.header.length > 0 && currentTable.rows.length > 0) {
+                    tables.push(currentTable);
                 }
+                currentTable = { header: [], rows: [] };
+                isHeader = true;
             }
+        } else if (isHeader) {
+            if (!firstCase) {
+                currentTable.header = [line]; 
+            }
+            isHeader = false;
+        } else {
+            if (line) currentTable.rows.push(line.split(/\s+/));
         }
-
-        if (line.includes("Finished:")) {
-            jobStatus = line.split(":")[1].trim();
-        }
-    });
-
-    return { ipDetails, jobStatus };
-};
-
-
-
-
-
-
-const getConsoleText = async (jenkinsURL) => {
-    let payload = { jenkinsURL };
-    setJenkinsDataLoader(true);
-
-    try {
-        let res = await axiosConfig.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {});
-        console.log("Jenkins Data:", res.data);
-
-        if (res.data) {
-            const { ipDetails, jobStatus } = parseConsoleOutput(res.data);
-            setJenkinsData(ipDetails);
-            setJobStatus(jobStatus);
-        }
-    } catch (error) {
-        console.error("Error fetching console text:", error);
     }
 
-    setJenkinsDataLoader(false);
-};
-
-
-return (
-    <div>
-        <h3>Job Status: {jobStatus}</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>IP Address</th>
-                    <th>Datacenter</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {jenkinsData.map((item, index) => (
-                    <tr key={index}>
-                        <td>{item.ip}</td>
-                        <td>{item.datacenter}</td>
-                        <td>{item.status}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
-
-
-const parseConsoleOutput = (data) => {
-    // Extract relevant data using regex or string manipulation
-    const ipDetails = [];
-    const lines = data.split("\n");
-    let jobStatus = "Loading...";
-
-    lines.forEach(line => {
-        // Extract IP, Datacenter, Status, etc.
-        if (line.includes("Datacenter")) {
-            const datacenter = line.split(":")[1].trim();
-            ipDetails.push({ datacenter });
-        }
-        if (line.match(/(\d{1,3}\.){3}\d{1,3}/)) {
-            const parts = line.split(" ");
-            const ip = parts[0];
-            const status = parts.includes("UN") ? "Up" : "Down";
-            ipDetails[ipDetails.length - 1] = {
-                ...ipDetails[ipDetails.length - 1],
-                ip,
-                status
-            };
-        }
-        if (line.includes("Finished:")) {
-            jobStatus = line.split(":")[1].trim();
-        }
-    });
-
-    return { ipDetails, jobStatus };
-};
-
-
-const getConsoleText = async (jenkinsURL) => {
-    let payload = { jenkinsURL };
-    setJenkinsDataLoader(true);
-
-    let res = await axiosConfig.post(nodeRedConfig.flowHttpUrl.load_test_workernode_console, payload, {});
-
-    if (res.data) {
-        const { ipDetails, jobStatus } = parseConsoleOutput(res.data);
-        setJenkinsData(ipDetails);
-        setJobStatus(jobStatus);
+    if (currentTable.header.length > 0 && currentTable.rows.length > 0) {
+        tables.push(currentTable);
     }
 
-    setJenkinsDataLoader(false);
+    return tables;
 };
 
+const TableRenderer = ({ text }) => {
+    const tables = parseTables(text);
 
-return (
-    <div>
-        <h3>Job Status: {jobStatus}</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>IP Address</th>
-                    <th>Datacenter</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {jenkinsData.map((item, index) => (
-                    <tr key={index}>
-                        <td>{item.ip}</td>
-                        <td>{item.datacenter}</td>
-                        <td>{item.status}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<img 
-  src={redirectIcon} 
-  alt="Redirect" 
-  onClick={() => window.location.href = 'https://your-target-url.com'}
-  onMouseEnter={handleMouseEnter}
-  onMouseLeave={handleMouseLeave}
-  style={{
-    width: '15px',
-    cursor: 'pointer',
-    marginLeft: '8px',
-    verticalAlign: 'middle'
-  }} 
-/>
-const handleMouseEnter = (e) => {
-  e.target.nextSibling.style.visibility = 'visible';
-  e.target.nextSibling.style.opacity = 1;
-};
-
-const handleMouseLeave = (e) => {
-  e.target.nextSibling.style.visibility = 'hidden';
-  e.target.nextSibling.style.opacity = 0;
-};
-
-
-
-{group.header === "Recycle" && (
-  <div style={{ display: 'inline-block', position: 'relative' }}>
-    <img 
-      src={redirectIcon} 
-      alt="Redirect" 
-      onClick={() => window.location.href = 'https://your-target-url.com'}
-      style={{
-        width: '15px',
-        cursor: 'pointer',
-        marginLeft: '8px',
-        verticalAlign: 'middle'
-      }} 
-    />
-    <span 
-      style={{
-        visibility: 'hidden',
-        backgroundColor: 'black',
-        color: '#fff',
-        textAlign: 'center',
-        borderRadius: '4px',
-        padding: '5px',
-        position: 'absolute',
-        zIndex: 1,
-        bottom: '125%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        opacity: 0,
-        transition: 'opacity 0.3s',
-        whiteSpace: 'nowrap',
-        fontSize: '12px'
-      }}
-    >
-      Go to Recyclebin Details
-    </span>
-  </div>
-)}
-
-
-
-.tooltip-text {
-  visibility: hidden;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 4px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%; /* Position above the icon */
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.tooltip-text::after {
-  content: '';
-  position: absolute;
-  top: 100%; /* Arrow pointing down */
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: black transparent transparent transparent;
-}
-
-div:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-
-
-{columnData.map((group, index) => (
-  <div key={index}>
-    <div style={headerStyle}>
-      {group.header}
-      
-      {group.header === "Recycle" && (
-        <img 
-          src={redirectIcon} 
-          alt="Redirect" 
-          onClick={() => window.location.href = 'https://your-target-url.com'}
-          style={{
-            width: '15px',     // Adjust the size as needed
-            cursor: 'pointer',
-            marginLeft: '8px', // Space between text and icon
-            verticalAlign: 'middle' // Aligns the icon with the text
-          }} 
-        />
-      )}
-    </div>
-  </div>
-))}
-
-
-
-import React, { useState } from 'react';
-import infoIcon from './path/to/image.png'; // Import your image
-
-const renderColumn1 = (columnData) => {
-  const [showPopup, setShowPopup] = useState(false);
-
-  const handleIconClick = (e) => {
-    e.preventDefault(); // Prevent the default anchor action
-    setShowPopup(!showPopup);
-  };
-
-  return (
-    <div style={{ width: '68%' }}>
-      {columnData.map((group, index) => (
-        <div key={index} style={{ position: 'relative' }}>
-          {group.header === "Recycle" ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ ...headerStyle, marginRight: '10px' }}>
-                {group.header}
-              </span>
-              <a href="#" onClick={handleIconClick}>
-                <img 
-                  src={infoIcon} 
-                  alt="Info" 
-                  style={{ 
-                    width: '20px', 
-                    cursor: 'pointer' 
-                  }} 
-                />
-              </a>
-
-              {/* Pop-up near the header */}
-              {showPopup && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: '0',
-                  backgroundColor: 'white',
-                  border: '1px solid #ccc',
-                  padding: '10px',
-                  boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
-                  zIndex: '10',
-                  marginTop: '5px',
-                  width: '200px'
-                }}>
-                  <h4>Recycle Bin Details</h4>
-                  <p>This section shows the usage of the recycle bin...</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={headerStyle}>{group.header}</div>
-          )}
-
-          {group.header === "Tablespace Usage >80%" && chartContent1}
-          {group.header === "Blockers" && group.rows.length === 0 && (
-            <div style={{ color: "Green" }}>
-              <h5>No Blockers detected</h5>
-            </div>
-          )}
-          {group.header === "Long Runners" && group.rows.length === 0 && (
-            <div style={{ color: "Green" }}>
-              <h5>No Long Runners detected</h5>
-            </div>
-          )}
+    return (
+        <div>
+            {tables.map((table, index) => (
+                <table key={index} border="1" style={{ marginBottom: "20px", borderCollapse: "collapse" }}>
+                    <thead>
+                        <tr>
+                            {table.header[0].split(/\s+/).map((col, idx) => (
+                                <th key={idx} style={{ padding: "8px", background: "#f2f2f2" }}>{col}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table.rows.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex} style={{ padding: "8px" }}>{cell}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
-import React, { useState } from 'react';
-
-const renderColumn1 = (columnData) => {
-  const [showModal, setShowModal] = useState(false);
-
-  const handleRecycleClick = () => {
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
-  return (
-    <div style={{ width: '68%' }}>
-      {columnData.map((group, index) => (
-        <div key={index}>
-          {group.header === "Recycle" ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ ...headerStyle, marginRight: '10px' }}>
-                {group.header}
-              </span>
-              <img
-                src="https://icon-library.com/images/info-icon/info-icon-24.jpg"
-                alt="info"
-                style={{ 
-                  width: '20px', 
-                  cursor: 'pointer' 
-                }}
-                onClick={handleRecycleClick}
-              />
-            </div>
-          ) : (
-            <div style={headerStyle}>{group.header}</div>
-          )}
-
-          {group.header === "Tablespace Usage >80%" && chartContent1}
-          {group.header === "Blockers" && group.rows.length === 0 && (
-            <div style={{ color: "Green" }}>
-              <h5>No Blockers detected</h5>
-            </div>
-          )}
-          {group.header === "Long Runners" && group.rows.length === 0 && (
-            <div style={{ color: "Green" }}>
-              <h5>No Long Runners detected</h5>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {/* Modal Popup */}
-      {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: 'white',
-          padding: '20px',
-          boxShadow: '0px 0px 10px rgba(0,0,0,0.3)',
-          zIndex: '1000'
-        }}>
-          <h3>Recycle Bin Details</h3>
-          <p>Here are the details of the recycle bin usage...</p>
-          <button onClick={closeModal}>Close</button>
-        </div>
-      )}
-
-      {/* Modal Overlay */}
-      {showModal && (
-        <div 
-          onClick={closeModal}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: '999'
-          }}
-        />
-      )}
-    </div>
-  );
-};
-
-
-
-
-
-You can conditionally render a styled button-like link for the "Recycle" header while keeping the default style for the others. Here's how to do it:
-
-const renderColumn1 = (columnData) => (
-  <div style={{ width: '68%' }}>
-    {columnData.map((group, index) => (
-      <div key={index}>
-        {group.header === "Recycle" ? (
-          <div 
-            style={{
-              ...headerStyle, 
-              padding: '10px 20px', 
-              backgroundColor: '#f0f0f0', 
-              borderRadius: '5px', 
-              cursor: 'pointer',
-              display: 'inline-block',
-              color: '#007bff',
-              textDecoration: 'underline'
-            }}
-            onClick={() => handleRecycleClick()}
-          >
-            {group.header}
-          </div>
-        ) : (
-          <div style={headerStyle}>{group.header}</div>
-        )}
-
-        {group.header === "Tablespace Usage >80%" && chartContent1}
-        {group.header === "Blockers" && group.rows.length === 0 && (
-          <div style={{ color: "Green" }}>
-            <h5>No Blockers detected</h5>
-          </div>
-        )}
-        {group.header === "Long Runners" && group.rows.length === 0 && (
-          <div style={{ color: "Green" }}>
-            <h5>No Long Runners detected</h5>
-          </div>
-        )}
-      </div>
-    ))}
-  </div>
-);
-
-In this version:
-
-If group.header is "Recycle", a clickable div styled like a link/button is rendered.
-
-It includes more padding and a cursor change to enhance the button-like appearance.
-
-It also uses onClick to trigger handleRecycleClick(), which you can define for navigation or other actions.
-
-For all other headers, the default style is applied.
-
-
-
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import RecycleBin from './RecycleBin';
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/recycle-bin" element={<RecycleBin />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
 
 
 
