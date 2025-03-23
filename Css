@@ -1,4 +1,27 @@
+const extractIP = (line) => {
+    const ipRegex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g;
+    const ips = line.match(ipRegex);
+    return ips ? ips[0] : null; // Return first IP if found, else null
+};
 
+if (!isUnwantedLine(line)) {
+    console.log("before:", line);
+
+    let extractedIP = extractIP(line); // Extract IP first
+    let cleanedLine = cleanData(line); // Process normally
+    let formattedData = cleanedLine.split(/\s+/).map(cell => cell.trim());
+
+    // If an IP was found, make sure it's at the end
+    if (extractedIP) {
+        formattedData.push(extractedIP);
+    }
+
+    if (formattedData.length > 1) {
+        currentTable.rows.push(formattedData);
+    }
+
+    console.log("after:", formattedData);
+}
 
 <table key={index} border="1" style={{
   marginBottom: "20px",
