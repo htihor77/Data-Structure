@@ -1,3 +1,37 @@
+
+
+{!loader && tableData.length > 0 && (
+  <div>
+    {tableData.map((table, index) => (
+      <table key={index} border="1" style={{ 
+        marginBottom: "20px", 
+        borderCollapse: "collapse", 
+        width: "100%", 
+        tableLayout: "fixed" 
+      }}>
+        <tbody>
+          {table.rows.map((row, rowIndex) => (
+            <tr key={rowIndex} 
+                style={{ background: rowIndex === 0 ? "#4CAF50" : rowIndex % 2 === 0 ? "#ffffff" : "#f9f9f9", 
+                         color: rowIndex === 0 ? "#ffffff" : "#000",
+                         fontWeight: rowIndex === 0 ? "bold" : "normal" }}>
+              {row.filter(cell => cell.trim() !== "").map((cell, cellIndex) => ( // Remove empty spaces
+                <td key={cellIndex} style={{ padding: "8px", border: "1px solid #ccc" }}>
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ))}
+  </div>
+)}
+
+
+
+
+
 {!loader && tableData.length > 0 && (
   <div>
     {tableData.map((table, index) => (
