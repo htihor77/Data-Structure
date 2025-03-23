@@ -1,4 +1,36 @@
-
+{!loader && tableData.length > 0 && (
+  <div>
+    {tableData.map((table, index) => (
+      <table key={index} border="1" style={{ 
+        marginBottom: "20px", 
+        borderCollapse: "collapse", 
+        width: "100%", 
+        tableLayout: "fixed" 
+      }}>
+        <thead>
+          <tr style={{ background: "#f2f2f2", textAlign: "left" }}>
+            {table.header.map((col, idx) => (
+              <th key={idx} style={{ padding: "8px", border: "1px solid #ccc" }}>
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, rowIndex) => (
+            <tr key={rowIndex} style={{ background: rowIndex % 2 === 0 ? "#ffffff" : "#f9f9f9" }}>
+              {row.filter(cell => cell.trim() !== "").map((cell, cellIndex) => ( // Remove empty spaces
+                <td key={cellIndex} style={{ padding: "8px", border: "1px solid #ccc" }}>
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ))}
+  </div>
+)}
 
 
 let dashEncountered = false; // Track when "----" appears
