@@ -1,3 +1,141 @@
+
+import React, { useState, useEffect } from "react";
+
+const RAC_CLUSTER_STATUS = ({ rawData }) => {
+    const [tableData, setTableData] = useState([]);
+
+    useEffect(() => {
+        parseData(rawData);
+    }, [rawData]);
+
+    const cleanData = (line) => {
+        return line
+            .replace(/[0-9;]*m/g, "")  // Remove ANSI color codes
+            .replace(/[0-9]+\./g, "")  // Remove numbering (e.g., "1.")
+            .replace(/.*?/g, "")   // Remove square brackets (e.g., "[data]")
+            .replace(/\s{2,}/g, " ")   // Replace multiple spaces with one
+            .replace(/\|/g, " ")       // Replace "|" with space if used as separator
+            .trim();
+    };
+
+    const isUnwantedLine = (line) => {
+        const unwantedPatterns = [
+            "Resource is disabled",
+            "STATUS and TARGET are different"
+        ];
+        return unwantedPatterns.some(pattern => line.includes(pattern));
+    };
+
+    const parseData = (text) => {
+        const lines = text.split("\n");
+        let tables = [];
+        let currentTable = { header: [], rows: [] };
+        let isHeader = true;
+        let firstCase = true;
+        let parsing = false;
+
+        lines.forEach((line, index) => {
+            line = line.trim();
+
+            // Start parsing only after "TASK [Display RAC status output]"
+            if (line.includes("TASK [Display RAC status output]")) {
+                parsing = true;
+                return;
+            }
+
+            // Stop parsing at "PLAY RECAP"
+            if (line.includes("PLAY RECAP")) {
+                parsing = false;
+                return;
+            }
+
+            if (parsing) {
+                if (line.startsWith("------")) {
+                    if (firstCase) {
+                        if (index > 0) {
+                            currentTable.header.push(cleanData(lines[index - 1].trim()));
+                        }
+                        firstCase = false;
+                    } else {
+                        if (currentTable.header.length > 0 && currentTable.rows.length > 0) {
+                            tables.push(currentTable);
+                        }
+                        currentTable = { header: [], rows: [] };
+                        isHeader = true;
+                    }
+                } else if (isHeader) {
+                    if (!firstCase && !isUnwantedLine(line)) {
+                        currentTable.header = [cleanData(line)];
+                    }
+                    isHeader = false;
+                } else {
+                    if (!isUnwantedLine(line)) {
+                        const formattedData = cleanData(line).split(" ").map(cell => cell.trim());
+                        if (formattedData.length > 1) {
+                            currentTable.rows.push(formattedData);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Push the last table if it has valid data
+        if (currentTable.header.length > 0 && currentTable.rows.length > 0) {
+            tables.push(currentTable);
+        }
+
+        console.log("MAIN DATA --->", tables);
+        setTableData(tables);
+    };
+
+    return (
+        <div>
+            {tableData.map((table, index) => (
+                <table key={index} border="1" style={{ marginBottom: "20px", borderCollapse: "collapse" }}>
+                    <thead>
+                        <tr>
+                            {table.header[0]?.split(/\s+/).map((col, idx) => (
+                                <th key={idx} style={{ padding: "8px", background: "#f2f2f2" }}>{col}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table.rows.map((row, rowIndex) => (
+                            <tr key={rowIndex}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex} style={{ padding: "8px" }}>{cell}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ))}
+        </div>
+    );
+};
+
+export default RAC_CLUSTER_STATUS;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const parseTables = (text) => {
     const lines = text.split("\n");
     let tables = [];
