@@ -1,4 +1,45 @@
 
+
+
+let dashEncountered = false; // Track when "----" appears
+
+lines.forEach((line, index) => {
+    if (line.includes("----")) {
+        if (!dashEncountered) {
+            // First occurrence of "----", set header
+            if (index > 0) {
+                currentTable.header = cleanData(lines[index - 1]);
+            }
+            dashEncountered = true;
+        } else {
+            // Second occurrence of "----", table data ends
+            if (currentTable.rows.length > 0) {
+                tables.push(currentTable);
+            }
+            currentTable = { header: [], rows: [] };
+            dashEncountered = false; // Reset for next table
+        }
+    } else if (dashEncountered) {
+        // Store table rows if between "----"
+        let formattedData = cleanData(line).split(/\s+/).map(cell => cell.trim());
+        if (formattedData.length > 1) {
+            currentTable.rows.push(formattedData);
+        }
+    }
+});
+
+// Push last table if not empty
+if (currentTable.rows.length > 0) {
+    tables.push(currentTable);
+}
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 
 const RAC_CLUSTER_STATUS = ({ rawData }) => {
