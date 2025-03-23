@@ -1,3 +1,40 @@
+
+
+<table key={index} border="1" style={{
+  marginBottom: "20px",
+  borderCollapse: "collapse",
+  width: "100%",
+  tableLayout: "fixed", // Prevents table from expanding beyond the container
+  overflow: "hidden"
+}}>
+  <tbody>
+    {table.rows.map((row, rowIndex) => (
+      <tr key={rowIndex} style={{
+        background: rowIndex === 0 ? "#4CAF50" : rowIndex % 2 === 0 ? "#ffffff" : "#f9f9f9",
+        color: rowIndex === 0 ? "#ffffff" : "#000",
+        fontWeight: rowIndex === 0 ? "bold" : "normal"
+      }}>
+        {row.filter(cell => cell.trim() !== "").map((cell, cellIndex) => (
+          <td key={cellIndex} style={{
+            padding: "8px",
+            border: "1px solid #ccc",
+            wordWrap: "break-word", // Ensures long text breaks
+            overflowWrap: "break-word",
+            whiteSpace: "normal", // Allows text to wrap properly
+            maxWidth: "200px" // Set max-width to prevent overflow
+          }}>
+            {cell}
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+
+
+
+
 import React, { useState } from "react";
 
 const DataTable = ({ tableData }) => {
