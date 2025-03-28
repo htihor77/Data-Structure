@@ -1,3 +1,61 @@
+
+<Row>
+  <View
+    style={{
+      fontWeight: 'bold',
+      display: 'flex',
+      fontSize: '22px',
+      gap: '15px',
+      color: 'purple',
+      marginBottom: '20px',
+      marginTop: '20px',
+      marginLeft: '40px',
+      marginRight: '40px',
+      padding: '15px',
+      borderRadius: '10px',
+      background: 'linear-gradient(145deg, #e6e6e6, #ffffff)',
+      boxShadow: '5px 5px 10px #b8b8b8, -5px -5px 10px #ffffff',
+    }}
+  >
+    <h2 style={{ margin: '0', textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)' }}>
+      Preparing report, please hold for 1-2 mins...
+    </h2>
+  </View>
+
+  <div>
+    {display && (
+      <div>
+        <Button
+          role="link"
+          surface="light"
+          size="small"
+          onClick={consoleCall}
+          style={{
+            background: 'linear-gradient(145deg, #d1d1d1, #ffffff)',
+            boxShadow: '4px 4px 8px #b5b5b5, -4px -4px 8px #ffffff',
+            borderRadius: '8px',
+            padding: '10px 15px',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'linear-gradient(145deg, #ffffff, #d1d1d1)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'linear-gradient(145deg, #d1d1d1, #ffffff)';
+          }}
+        >
+          {buttonLoading ? 'Loading Console Button...' : 'Click Here to Open Jenkins Console'}
+        </Button>
+      </div>
+    )}
+  </div>
+</Row>
+
+
+
+
+
 const extractIP = (line) => {
     const ipRegex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g;
     const ips = line.match(ipRegex);
