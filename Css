@@ -1,3 +1,15 @@
+
+Issue: In production, the PrimeReact Dropdown component was not displaying values correctly when using an array of arrays as options. However, it worked fine in the local environment. Instead of showing the expected values, it was returning undefined.
+
+Possible Cause: This could be due to a version mismatch between local and production environments, affecting how PrimeReact processes nested arrays. Ideally, this issue should not have occurred, but due to an inconsistency, it did.
+
+Fix & Deployment: To resolve this, I removed the nested array structure, ensuring the dropdown receives a simpler, more predictable data format. The fix has been deployed, and due to the monetarium, the updated code will be available in production by Monday.
+
+
+
+
+
+
 <Row style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
   
   {/* Status Message with 3D Effect */}
