@@ -1,4 +1,64 @@
-
+Output.push(
+  <div key={index} style={{ color: "green", marginLeft: "10px", fontSize: "large", fontWeight: "700" }}>
+    {group.header}
+    <table key={index} style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
+      <thead>
+        <tr>
+          {keys.map((key) => (
+            <th
+              key={key}
+              style={{
+                border: '2px solid #ddd',
+                padding: '8px',
+                backgroundColor: '#f2f2f2',
+                color: '#620391',
+                fontSize: '12px',
+                textAlign: 'left !important'
+              }}
+            >
+              {key}
+            </th>
+          ))}
+          <th key="action-column" className="action-column table_shift_left">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {group_rows.map((item, rowIndex) => (
+          <tr key={`row-${rowIndex}`}>
+            {keys.map((key) => (
+              <td
+                key={key}
+                className={key === "Action" ? "action-column table_shift_left" : ""}
+                style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'left' }}
+              >
+                {key === "SQL_ID" ? (
+                  <a
+                    href="#"
+                    onClick={() => handleSQLIDClick(item[key], item)}
+                    style={{ color: 'blue', textDecoration: 'underline' }}
+                  >
+                    {item[key]}
+                  </a>
+                ) : (
+                  typeof item[key] === 'number' && Number.isInteger(item[key]) ? item[key].toFixed(1) : item[key]
+                )}
+              </td>
+            ))}
+            <td>
+              <button
+                className="btn btn-primary btn-block kill-button"
+                onClick={() => killProcess(item)}
+                disabled={killedGties[item.SID]}
+              >
+                {killedGties[item.SID] ? 'killed' : 'kill'}
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 const handleSQLIDClick = (sqlId, item) => {
   // Custom logic to handle the SQL_ID click
   // For now just logging — you can integrate navigation or fetch as needed
