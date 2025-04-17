@@ -1,3 +1,40 @@
+
+function extractLastPlaybookBlock(logString) {
+  const lines = logString.split('\n');
+  let endIndex = -1;
+  let startIndex = -1;
+
+  // Step 1: Find the last "PLAY RECAP"
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].includes('PLAY RECAP')) {
+      endIndex = i;
+      break;
+    }
+  }
+
+  // Step 2: Find the closest "TASK [debug]" before that
+  if (endIndex !== -1) {
+    for (let i = endIndex; i >= 0; i--) {
+      if (lines[i].includes('TASK [debug]')) {
+        startIndex = i;
+        break;
+      }
+    }
+  }
+
+  // Step 3: Return the extracted section
+  if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+    return lines.slice(startIndex, endIndex + 1).join('\n');
+  } else {
+    return 'No matching TASK [debug] to PLAY RECAP block found.';
+  }
+}
+
+
+
+
+
+
 Output.push(
   <div key={index} style={{ color: "green", marginLeft: "10px", fontSize: "large", fontWeight: "700" }}>
     {group.header}
