@@ -1,4 +1,28 @@
+import React from 'react';
 
+const ConsoleOutputViewer = ({ output }) => {
+  return (
+    <div
+      style={{
+        backgroundColor: '#1e1e1e',
+        color: '#d4d4d4',
+        fontFamily: 'monospace',
+        padding: '1rem',
+        borderRadius: '12px',
+        maxHeight: '500px',
+        overflowY: 'auto',
+        whiteSpace: 'pre-wrap',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
+        border: '1px solid #333',
+        lineHeight: '1.5',
+      }}
+    >
+      {output}
+    </div>
+  );
+};
+
+export default ConsoleOutputViewer;
 function extractLastPlaybookBlock(logString) {
   const lines = logString.split('\n');
   let endIndex = -1;
