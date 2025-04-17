@@ -1,3 +1,56 @@
+
+<Row>
+  {isdataanyshell && (
+    <div
+      style={{
+        fontWeight: 'bold',
+        display: 'flex',
+        marginTop: '20px',
+        fontSize: '20px',
+        gap: '10px',
+        color: 'purple',
+        marginBottom: '20px',
+      }}
+    >
+      {/* You can add your status or shell details here */}
+    </div>
+  )}
+
+  <h2 style={{ margin: "0" }}>Nodetool Status:</h2>
+
+  <Button 
+    role="link" 
+    surface="light" 
+    size="small" 
+    onClick={consolecall}
+  >
+    JENKINS CONSOLE
+  </Button>
+
+  {/* This is the storer output section */}
+  <div
+    style={{
+      backgroundColor: '#1e1e1e',
+      fontFamily: 'monospace',
+      padding: '1rem',
+      borderRadius: '12px',
+      maxHeight: '500px',
+      overflowY: 'auto',
+      whiteSpace: 'pre-wrap', // handles long lines wrapping
+      boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
+      border: '1px solid #333',
+      lineHeight: '1.5',
+      marginTop: '1rem'
+    }}
+  >
+    {storer?.split('\n').map((line, index) => (
+      <div key={index}>{line}</div>
+    ))}
+  </div>
+</Row>
+
+
+
 import React from 'react';
 
 const ConsoleOutputViewer = ({ output }) => {
