@@ -1,3 +1,144 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { CheckCircle, XCircle } from 'lucide-react';
+
+const expectedValidations = {
+  disk: [
+    '/app',
+    '/cassandra/data',
+    '/cassandra/commitlog',
+    '/cassandra_logs',
+    '/cmprecon',
+  ],
+  nproc: [
+    '*      soft    nproc    4096',
+    'root       soft    nproc     unlimited',
+  ],
+  rcLocal: [
+    'echo never > /sys/kernel/mm/transparent_hugepage/defrag',
+    'echo never > /sys/kernel/mm/transparent_hugepage/enabled',
+    'CD_DSK=`lsblk -lno PKNAME,LABEL |grep CDATA |awk \'{print $1}\'`',
+    'CTL_DSK=`lsblk -lno PKNAME,LABEL |grep CTLOG |awk \'{print $1}\'`',
+    'echo 1 > /sys/block/$CD_DSK/queue/nomerges',
+    'echo 1 > /sys/block/$CTL_DSK/queue/nomerges',
+    'echo 16 > /sys/block/$CD_DSK/queue/read_ahead_kb',
+    'echo 16 > /sys/block/$CTL_DSK/queue/read_ahead_kb',
+  ],
+  memlock: [
+    'cassandra - memlock unlimited',
+    'cassandra   - nofile 1048576',
+    'cassandra   - nproc  32768',
+  ],
+  datastax: [
+    'kernel.msgmnb=33554432',
+    'kernel.msgmax=65536',
+    'kernel.shmmax=33554432',
+    'kernel.shmall=33554432',
+    'vm.max_map_count=1048575',
+    'net.ipv4.tcp_fin_timeout=30',
+    'net.core.netdev_max_backlog=16384',
+    'net.core.somaxconn=16384',
+    'vm.swappiness=1',
+    'net.core.rmem_default=1048576',
+    'fs.file-max=1048576',
+    'net.ipv4.tcp_keepalive_time=300',
+    'vm.nr_hugepages=34400',
+  ],
+  sysctl: ['net.ipv4.tcp_syncookies=1'],
+  crontab: ['/app/cassandra/shell/scripts/nodetoolstatus.ksh'],
+};
+
+function validateJenkinsOutput(stdoutLines) {
+  const results = {};
+
+  const includesAny = (line, items) => items.some(item => line.includes(item));
+
+  // Disk Validation
+  results.disk = expectedValidations.disk.every(expected =>
+    stdoutLines.some(line => line.includes(expected))
+  );
+
+  // nproc Validation
+  results.nproc = expectedValidations.nproc.every(expected =>
+    stdoutLines.some(line => line.includes(expected))
+  );
+
+  // rc.local Validation
+  results.rcLocal = expectedValidations.rcLocal.every(expected =>
+    stdoutLines.some(line => line.includes(expected))
+  );
+
+  // memlock & nofile Validation
+  results.memlock = expectedValidations.memlock.every(expected =>
+    stdoutLines.some(line => line.includes(expected))
+  );
+
+  // Datastax sysctl parameters Validation
+  results.datastax = expectedValidations.datastax.every(expected =>
+    stdoutLines.some(line => line.includes(expected))
+  );
+
+  // sysctl.conf Validation: Must have syncookies line and then a closing ']'
+  const syncookieIndex = stdoutLines.findIndex(line =>
+    line.includes('net.ipv4.tcp_syncookies=1')
+  );
+  results.sysctl =
+    syncookieIndex !== -1 &&
+    stdoutLines.slice(syncookieIndex + 1).some(line => line.trim() === ']');
+
+  // Crontab Validation
+  results.crontab = stdoutLines.some(line =>
+    line.includes(expectedValidations.crontab[0])
+  );
+
+  return results;
+}
+
+export default function JenkinsValidationUI({ output }) {
+  const [result, setResult] = useState(null);
+
+  const runValidation = () => {
+    const validation = validateJenkinsOutput(output.stdout_lines);
+    setResult(validation);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-gray-800 text-white">
+      <Card className="w-full max-w-3xl shadow-2xl rounded-2xl p-6 bg-slate-800 border border-slate-600">
+        <CardContent>
+          <h1 className="text-3xl font-bold text-center mb-6">Jenkins Output Validation</h1>
+          <Button className="w-full mb-4 text-lg bg-green-600 hover:bg-green-700" onClick={runValidation}>
+            Run Validation
+          </Button>
+          {result && (
+            <div className="space-y-4 mt-6 bg-slate-700 p-4 rounded-xl shadow-lg">
+              {Object.entries(result).map(([key, isValid]) => (
+                <div
+                  key={key}
+                  className={`flex items-center justify-between p-3 rounded-xl ${
+                    isValid ? 'bg-green-700' : 'bg-red-700'
+                  }`}
+                >
+                  <span className="capitalize text-lg font-semibold">{key.replace(/([A-Z])/g, ' $1')}</span>
+                  {isValid ? <CheckCircle className="text-white" /> : <XCircle className="text-white" />}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
 1.disk validation  
 
 first block 
