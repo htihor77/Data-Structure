@@ -1,4 +1,145 @@
+1.disk validation  
 
+first block 
+
+true case:
+"/dev/nvme5n1p1   50G   13G   38G  26% /app",
+
+11:54:19         "/dev/nvme2n1p1  2.0T   26G  2.0T   2% /cassandra/data",
+
+11:54:19         "/dev/nvme1n1p1  500G   27G  474G   6% /cassandra/commitlog",
+
+11:54:19         "/dev/nvme4n1p1   50G  2.8G   48G   6% /cassandra_logs",
+   "144.70.0.13:/   8.0E  6.9T  8.0E   1% /cmprecon"
+
+
+false case:
+ANYONE MISSED IS FALSE
+
+
+2.nproc validation
+
+
+true case:
+  "*      soft    nproc    4096",
+ "root       soft    nproc     unlimited"
+
+
+false case:
+ANYTHING MISSED IS FALSE
+
+
+3.rc.local file validation
+
+
+true case:
+
+ "echo never > /sys/kernel/mm/transparent_hugepage/defrag",
+ "echo never > /sys/kernel/mm/transparent_hugepage/enabled",
+
+"CD_DSK=`lsblk -lno PKNAME,LABEL |grep CDATA |awk '{print $1}'`",
+"CTL_DSK=`lsblk -lno PKNAME,LABEL |grep CTLOG |awk '{print $1}'`",
+
+ "echo 1 > /sys/block/$CD_DSK/queue/nomerges"
+ "echo 1 > /sys/block/$CTL_DSK/queue/nomerges",
+ "echo 16 > /sys/block/$CD_DSK/queue/read_ahead_kb",
+"echo 16 > /sys/block/$CTL_DSK/queue/read_ahead_kb"
+
+
+false case:
+ANYTHING MISSED IS FALSE
+
+
+4.memlock and noflie[number of file]:
+
+true case:
+"cassandra - memlock unlimited",
+ "cassandra   - nofile 1048576"
+
+ "cassandra   - nproc  32768",
+
+
+false case:
+ANYTHING MISSED IS FALSE
+
+5.Datastax recommended parameters validation
+
+true case:
+#Djerdj's suggestion
+kernel.msgmnb=33554432
+kernel.msgmax=65536
+
+#Djerdj's suggestion
+kernel.shmmax=33554432
+
+#Djerdj's suggestion
+kernel.shmall=33554432
+vm.max_map_count=1048575
+
+#Djerdj's suggestion:
+net.ipv4.tcp_fin_timeout=30
+net.core.netdev_max_backlog=16384
+net.core.somaxconn=16384
+net.ipv4.tcp_keepalive_intvl=10
+net.ipv4.tcp_keepalive_probes=3
+
+#(Djerdj,  review using 1)
+vm.swappiness=1
+net.core.rmem_default=1048576
+net.core.rmem_max=67108864
+net.core.wmem_default=1048576
+net.core.wmem_max=67108864
+net.core.optmem_max=40960
+net.ipv4.tcp_rmem=4096 1048576 67108864
+net.ipv4.tcp_wmem=4096 1048576 67108864
+net.ipv4.tcp_slow_start_after_idle=0
+net.ipv4.tcp_keepalive_time=300
+net.ipv4.tcp_timestamps=0
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.tcp_tw_recycle=1
+net.ipv4.tcp_sack=0
+net.ipv4.tcp_max_syn_backlog=16384
+
+#Datastax recommendation:
+fs.file-max=1048576
+kernel.pid_max=200000
+net.ipv4.ip_local_port_range=10000 65535
+net.ipv4.tcp_window_scaling=1
+
+# Aggressive dirty block flushing
+vm.dirty_expire_centisecs=500
+vm.dirty_writeback_centisecs=100
+vm.dirty_background_bytes=268435456
+
+#added on 2/9/2017 per djerdj
+vm.nr_hugepages=34400
+vm.hugetlb_shm_group=500
+
+
+
+false case:
+ANYTHING MISSED IS FALSE
+
+
+6.SYSCTL.CONF VALIDATION:
+TRUE CASE:
+ "net.ipv4.tcp_syncookies=1                        # Security Requirement, CIS rhel8_3.2.8",
+
+AFTER THIS LINE IT SHOULD BE  CLOSED "]"
+
+FALSE CASE:
+"net.ipv4.tcp_syncookies=1                        # Security Requirement, CIS rhel8_3.2.8",
+ANYTHING THERE OTHER THAN CLOSED "]" IS FALSE CASE
+
+
+7.crontab VALIDATION
+
+TRUE CASE:
+IF PRESENCE OF " * /app/cassandra/shell/scripts/nodetoolstatus.ksh", 
+
+false case:
+
+ IF absence OF " * /app/cassandra/shell/scripts/nodetoolstatus.ksh", 
 <Row>
   {isdataanyshell && (
     <div
