@@ -1,3 +1,36 @@
+
+
+let concatenatedRows = [];
+let isFirstLoop = true; // flag to track first loop
+
+for (let i = 0; i < queries.length; i++) {
+    try {
+        const result = await nodeConnection.execute(queries[i]);
+        if (result && Array.isArray(result.rows)) {
+            
+            if (isFirstLoop) {
+                // First time, keep everything (header + data)
+                concatenatedRows.push(...result.rows);
+                isFirstLoop = false; // Set flag to false after first loop
+            } else {
+                // From second time onwards, skip the first row (header)
+                concatenatedRows.push(...result.rows.slice(1));
+            }
+
+        }
+    } catch (error) {
+        console.error(`Error executing query ${i + 1}:`, error);
+        throw error;
+    }
+}
+
+console.log('concatenatedRows:', concatenatedRows);
+
+
+
+
+
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
