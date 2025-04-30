@@ -1,3 +1,23 @@
+// Required imports import React, { useState } from "react"; import { TabView, TabPanel } from "primereact/tabview"; import { Card } from "primereact/card"; import "primereact/resources/themes/lara-light-indigo/theme.css"; import "primereact/resources/primereact.min.css";
+
+const expectedDiskMounts = ["/app", "/cassandra/data", "/cassandra/commitlog", "/cassandra_logs", "/cmprecon"]; const expectedNproc = ["*      soft    nproc    4096", "root       soft    nproc     unlimited"]; const expectedRcLocal = [ "echo never > /sys/kernel/mm/transparent_hugepage/defrag", "echo never > /sys/kernel/mm/transparent_hugepage/enabled", "CD_DSK=, CTL_DSK=, echo 1 > /sys/block/$CD_DSK/queue/nomerges", "echo 1 > /sys/block/$CTL_DSK/queue/nomerges", "echo 16 > /sys/block/$CD_DSK/queue/read_ahead_kb", "echo 16 > /sys/block/$CTL_DSK/queue/read_ahead_kb" ]; const expectedMemlockNofile = [ "cassandra - memlock unlimited", "cassandra   - nofile 1048576", "cassandra   - nproc  32768" ]; const expectedDatastaxSnippets = ["kernel.msgmnb=33554432", "kernel.shmall=33554432", "net.ipv4.tcp_keepalive_time=300", "vm.swappiness=1"]; const sysctlRequiredLine = "net.ipv4.tcp_syncookies=1"; const crontabRequiredLine = "* /app/cassandra/shell/scripts/nodetoolstatus.ksh";
+
+const validatePresence = (lines, expected) => { return expected.filter(line => !lines.some(l => l.includes(line))); };
+
+const validateSysctl = (lines) => { const requiredIndex = lines.findIndex(l => l.includes(sysctlRequiredLine)); if (requiredIndex === -1) return ["Required syncookie line not found."]; for (let i = requiredIndex + 1; i < lines.length; i++) { if (lines[i].trim() !== "]") return ["Extra line after syncookie line: " + lines[i]]; else break; } return []; };
+
+const validateCrontab = (lines) => { return lines.some(l => l.includes(crontabRequiredLine)) ? [] : ["Crontab script line missing."]; };
+
+const validateSection = { Disk: (lines) => validatePresence(lines, expectedDiskMounts), Nproc: (lines) => validatePresence(lines, expectedNproc), RcLocal: (lines) => validatePresence(lines, expectedRcLocal), MemlockNofile: (lines) => validatePresence(lines, expectedMemlockNofile), Datastax: (lines) => validatePresence(lines, expectedDatastaxSnippets), Sysctl: validateSysctl, Crontab: validateCrontab, };
+
+export default function LogValidator({ sectionData }) { const result = []; const failures = [];
+
+Object.entries(validateSection).forEach(([name, validateFunc], index) => { const lines = sectionData[index] || []; const errors = validateFunc(lines); result.push({ name, lines, errors }); if (errors.length > 0) failures.push(name); });
+
+const passed = failures.length === 0;
+
+return ( <div className="p-4"> <h2 className={text-xl font-bold mb-4 ${passed ? 'text-green-600' : 'text-red-600'}}> {passed ? 'All Cases Passed' : ${failures.length} Cases Failed: ${failures.join(", ")}} </h2> <TabView> {result .filter(r => passed || failures.includes(r.name)) .map(({ name, lines, errors }) => ( <TabPanel key={name} header={name} headerStyle={{ fontWeight: failures.includes(name) ? 'bold' : 'normal', color: failures.includes(name) ? 'red' : 'inherit' }}> <Card className="shadow-3 border-round-xl p-3"> {lines.map((line, idx) => ( <pre key={idx} className={text-sm p-2 ${errors.some(err => line.includes(err)) ? 'bg-red-100 border-red-500 border-left-4' : 'bg-green-50 border-green-300 border-left-2'}} > {line} </pre> ))} {errors.length > 0 && ( <div className="text-sm mt-3 text-red-700"> <strong>Issues:</strong> <ul> {errors.map((err, idx) => <li key={idx}>- {err}</li>)} </ul> </div> )} </Card> </TabPanel> ))} </TabView> </div> ); }
+
 
 
 
