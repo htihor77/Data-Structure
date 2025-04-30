@@ -1,3 +1,69 @@
+// DiskValidator.js
+export function validateDiskSectionLines(sectionText) {
+    const requiredMounts = [
+        "/app",
+        "/cassandra/data",
+        "/cassandra/commitlog",
+        "/cassandra_logs",
+        "/cmprecon"
+    ];
+
+    const lines = sectionText.split('\n').filter(line => line.trim() !== '');
+
+    const foundMounts = [];
+    const decoratedLines = lines.map(line => {
+        const matchedMount = requiredMounts.find(m => line.includes(m));
+        if (matchedMount) {
+            foundMounts.push(matchedMount);
+            return { line, isValid: true };
+        } else {
+            return { line, isValid: false };
+        }
+    });
+
+    const missingMounts = requiredMounts.filter(m => !foundMounts.includes(m));
+
+    return {
+        decoratedLines,
+        isValid: missingMounts.length === 0,
+        missingMounts
+    };
+}
+
+import { Card } from 'primereact/card';
+import { validateDiskSectionLines } from './DiskValidator';
+
+export default function DiskValidationCard({ logText }) {
+    const result = validateDiskSectionLines(logText);
+
+    return (
+        <Card title="Disk Validation" className="shadow-4 border-round p-4 mb-4">
+            {result.decoratedLines.map(({ line, isValid }, idx) => (
+                <pre
+                    key={idx}
+                    className={`p-2 my-1 border-round text-sm ${isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                >
+                    {line}
+                </pre>
+            ))}
+            {!result.isValid && (
+                <div className="mt-3">
+                    <strong className="text-red-700">Missing Mount Points:</strong>
+                    <ul>
+                        {result.missingMounts.map((mount, idx) => (
+                            <li key={idx} className="text-red-600">- {mount}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            {result.isValid && (
+                <p className="text-green-700 mt-3 font-bold">All required mount points are present!</p>
+            )}
+        </Card>
+    );
+}
+
+
 
 
 let concatenatedRows = [];
