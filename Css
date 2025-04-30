@@ -1,3 +1,30 @@
+
+
+
+<div style={{ padding: '1rem' }}>
+  {resultDisk.lines.map((lineObj, idx) => (
+    <div
+      key={idx}
+      style={{
+        margin: '0.5rem 0',
+        padding: '0.75rem',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        backgroundColor: lineObj.valid ? '#e6ffed' : '#ffe6e6',
+        color: lineObj.valid ? '#2e7d32' : '#c62828',
+        fontFamily: 'monospace',
+        fontSize: '14px'
+      }}
+    >
+      {lineObj.text}
+    </div>
+  ))}
+</div>
+
+
+
+
+
 // DiskValidator.js
 export function validateDiskSectionLines(sectionText) {
     const requiredMounts = [
