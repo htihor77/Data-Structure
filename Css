@@ -1,3 +1,40 @@
+
+// Sample full React component using PrimeReact to validate 7 sections // and render results in TabView format with highlighted failed lines
+
+import React from "react"; import { TabView, TabPanel } from "primereact/tabview"; import { Card } from "primereact/card"; import "primereact/resources/themes/lara-light-indigo/theme.css"; import "primereact/resources/primereact.min.css"; import "primeicons/primeicons.css";
+
+const validateDisk = (lines) => { const required = [ "/app", "/cassandra/data", "/cassandra/commitlog", "/cassandra_logs", "/cmprecon" ]; const joined = lines.join("\n"); const missing = required.filter((path) => !joined.includes(path)); return { passed: missing.length === 0, missing }; };
+
+const validateNproc = (lines) => { const required = [ "*      soft    nproc    4096", "root       soft    nproc     unlimited" ]; const missing = required.filter((line) => !lines.includes(line)); return { passed: missing.length === 0, missing }; };
+
+const validateRc = (lines) => { const required = [ "echo never > /sys/kernel/mm/transparent_hugepage/defrag", "echo never > /sys/kernel/mm/transparent_hugepage/enabled", "CD_DSK=`lsblk -lno PKNAME,LABEL |grep CDATA |awk '{print $1}'`", "CTL_DSK=`lsblk -lno PKNAME,LABEL |grep CTLOG |awk '{print $1}'`", "echo 1 > /sys/block/$CD_DSK/queue/nomerges", "echo 1 > /sys/block/$CTL_DSK/queue/nomerges", "echo 16 > /sys/block/$CD_DSK/queue/read_ahead_kb", "echo 16 > /sys/block/$CTL_DSK/queue/read_ahead_kb" ]; const missing = required.filter((line) => !lines.includes(line)); return { passed: missing.length === 0, missing }; };
+
+const validateMemlock = (lines) => { const required = [ "cassandra - memlock unlimited", "cassandra   - nofile 1048576", "cassandra   - nproc  32768" ]; const missing = required.filter((line) => !lines.includes(line)); return { passed: missing.length === 0, missing }; };
+
+const validateDatastax = (lines) => { const requiredSnippets = [ "kernel.msgmnb=33554432", "kernel.shmall=33554432", "net.ipv4.tcp_fin_timeout=30", "fs.file-max=1048576", "vm.nr_hugepages=34400" ]; const joined = lines.join("\n"); const missing = requiredSnippets.filter((item) => !joined.includes(item)); return { passed: missing.length === 0, missing }; };
+
+const validateSysctl = (lines) => { const syncLine = "net.ipv4.tcp_syncookies=1                        # Security Requirement, CIS rhel8_3.2.8"; const hasSync = lines.includes(syncLine); const index = lines.indexOf(syncLine); const closedProperly = hasSync && index === lines.length - 1; const missing = []; if (!hasSync) missing.push("Missing required syncookie line"); else if (!closedProperly) missing.push("File not properly closed after syncookie line"); return { passed: missing.length === 0, missing }; };
+
+const validateCrontab = (lines) => { const required = "* /app/cassandra/shell/scripts/nodetoolstatus.ksh"; const missing = lines.some((line) => line.includes(required)) ? [] : [required]; return { passed: missing.length === 0, missing }; };
+
+export default function ValidationTabs({ A, B, C, D, E, F, G }) { const sections = [ { key: 'disk', label: 'Disk Validation', data: A, validator: validateDisk }, { key: 'nproc', label: 'Nproc Validation', data: B, validator: validateNproc }, { key: 'rc', label: 'RC.local Validation', data: C, validator: validateRc }, { key: 'memlock', label: 'Memlock/Nofile', data: D, validator: validateMemlock }, { key: 'datastax', label: 'Datastax Validation', data: E, validator: validateDatastax }, { key: 'sysctl', label: 'Sysctl.conf', data: F, validator: validateSysctl }, { key: 'crontab', label: 'Crontab Validation', data: G, validator: validateCrontab }, ];
+
+const results = sections.map(section => { const result = section.validator(section.data); return { ...section, ...result }; });
+
+const failed = results.filter(r => !r.passed); const passed = results.every(r => r.passed);
+
+return ( <div className="p-4"> <h2 style={{ color: passed ? 'green' : 'red' }}> {passed ? 'All Cases Passed' : ${failed.length} Cases Failed} </h2> <TabView> {(passed ? results : failed).map((result, i) => ( <TabPanel key={result.key} header={result.label} leftIcon={result.passed ? "pi pi-check-circle" : "pi pi-times-circle"} > <Card className="shadow-3 surface-card p-3 border-round-xl"> {result.passed ? ( <pre>{result.data.join("\n")}</pre> ) : ( <div> {result.data.map((line, i) => ( <pre key={i} style={{ backgroundColor: result.missing.some(m => line.includes(m)) ? '#ffcccc' : 'inherit', padding: '4px', borderRadius: '5px', }} > {line} </pre> ))} {result.missing.length > 0 && ( <p style={{ color: 'red' }}> Missing or Incorrect: <ul> {result.missing.map((m, i) => <li key={i}>{m}</li>)} </ul> </p> )} </div> )} </Card> </TabPanel> ))} </TabView> </div> ); }
+
+
+
+
+
+
+
+
+
+
+
 // Required imports import React, { useState } from "react"; import { TabView, TabPanel } from "primereact/tabview"; import { Card } from "primereact/card"; import "primereact/resources/themes/lara-light-indigo/theme.css"; import "primereact/resources/primereact.min.css";
 
 const expectedDiskMounts = ["/app", "/cassandra/data", "/cassandra/commitlog", "/cassandra_logs", "/cmprecon"]; const expectedNproc = ["*      soft    nproc    4096", "root       soft    nproc     unlimited"]; const expectedRcLocal = [ "echo never > /sys/kernel/mm/transparent_hugepage/defrag", "echo never > /sys/kernel/mm/transparent_hugepage/enabled", "CD_DSK=, CTL_DSK=, echo 1 > /sys/block/$CD_DSK/queue/nomerges", "echo 1 > /sys/block/$CTL_DSK/queue/nomerges", "echo 16 > /sys/block/$CD_DSK/queue/read_ahead_kb", "echo 16 > /sys/block/$CTL_DSK/queue/read_ahead_kb" ]; const expectedMemlockNofile = [ "cassandra - memlock unlimited", "cassandra   - nofile 1048576", "cassandra   - nproc  32768" ]; const expectedDatastaxSnippets = ["kernel.msgmnb=33554432", "kernel.shmall=33554432", "net.ipv4.tcp_keepalive_time=300", "vm.swappiness=1"]; const sysctlRequiredLine = "net.ipv4.tcp_syncookies=1"; const crontabRequiredLine = "* /app/cassandra/shell/scripts/nodetoolstatus.ksh";
