@@ -1,122 +1,73 @@
-<table style={{ width: '100%', borderCollapse: 'collapse', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-  <thead>
-    <tr style={{ backgroundColor: '#f4f4f9', textAlign: 'left', borderBottom: '2px solid #ccc' }}>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Data Center</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Status</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Address</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Load</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Tokens</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Host ID</th>
-      <th style={{ padding: '10px', fontWeight: 'bold', fontSize: '14px' }}>Rack</th>
-    </tr>
-  </thead>
-  <tbody>
-    {tableData.length > 0 ? (
-      tableData.map((row, index) => (
-        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9' }}>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.dataCenter}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.status}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.address}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.load}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.tokens}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.hostId}</td>
-          <td style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontSize: '13px', color: '#333' }}>{row.rack}</td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan="7" style={{ textAlign: 'center', padding: '10px' }}>No Data Found</td>
-      </tr>
-    )}
-  </tbody>
-</table>
+
+
+// This is the full working code with all 7 validations included. // Using React + PrimeReact TabView to display validation status
+
+import React, { useState, useEffect } from 'react'; import { TabView, TabPanel } from 'primereact/tabview'; import { Card } from 'primereact/card';
+
+// Utility function to highlight missing lines const highlightMissing = (requiredLines, inputLines) => { return requiredLines.map(line => ({ text: line, missing: !inputLines.includes(line) })); };
+
+// 1. Disk Validation const validateDisk = (lines) => { const required = [ '/mount/app', '/mount/cassandra', '/mount/data', '/mount/cassandra/commitlogs', '/mount/cassandra/alertlogs', '/mount/cassandra/scamperion' ]; return highlightMissing(required, lines); };
+
+// 2. nproc Validation const validateNproc = (lines) => { const required = [ '* soft nproc 32768', '* hard nproc 65536' ]; return highlightMissing(required, lines); };
+
+// 3. rc.local Validation const validateRclocal = (lines) => { const required = [ 'ulimit -n 1000000', 'ulimit -l unlimited' ]; return highlightMissing(required, lines); };
+
+// 4. memlock + nofile Validation const validateMemlockNofile = (lines) => { const required = [ '* soft memlock unlimited', '* hard memlock unlimited', '* soft nofile 1000000', '* hard nofile 1000000' ]; return highlightMissing(required, lines); };
+
+// 5. Datastax Validation (ignores # lines) const validateDatastax = (lines) => { const required = [ 'authenticator: AllowAllAuthenticator', 'authorizer: AllowAllAuthorizer', 'row_cache_class_name: org.apache.cassandra.cache.RowsCache' ]; const filtered = lines.filter(line => !line.trim().startsWith('#')); return highlightMissing(required, filtered); };
+
+// 6. sysctl.conf Validation (must end cleanly) const validateSysctl = (lines) => { const mustHave = 'vm.max_map_count = 1048575'; const index = lines.indexOf(mustHave); const after = lines.slice(index + 1); return index >= 0 && after.every(line => line.trim().startsWith('#') || line.trim() === '') ? [{ text: mustHave, missing: false }] : [{ text: mustHave, missing: index < 0 }, ...after.map(l => ({ text: l, missing: true }))]; };
+
+// 7. Crontab Validation const validateCrontab = (lines) => { const required = ['0 3 * * * /opt/datastax/dse/dse repair']; return highlightMissing(required, lines); };
+
+export default function LogValidator({ diskLines = [], nprocLines = [], rcLocalLines = [], memlockLines = [], datastaxLines = [], sysctlLines = [], crontabLines = [] }) { const sections = [ { label: 'Disk', validator: validateDisk, lines: diskLines }, { label: 'nproc', validator: validateNproc, lines: nprocLines }, { label: 'rc.local', validator: validateRclocal, lines: rcLocalLines }, { label: 'Memlock & Nofile', validator: validateMemlockNofile, lines: memlockLines }, { label: 'Datastax', validator: validateDatastax, lines: datastaxLines }, { label: 'sysctl.conf', validator: validateSysctl, lines: sysctlLines }, { label: 'crontab', validator: validateCrontab, lines: crontabLines } ];
+
+const results = sections.map(s => { const output = s.validator(s.lines); const hasError = output.some(o => o.missing); return { label: s.label, result: output, hasError }; });
+
+const failedTabs = results.filter(r => r.hasError); const passedAll = failedTabs.length === 0;
+
+return ( <div className="p-4"> <h2 style={{ color: passedAll ? 'green' : 'red' }}> {passedAll ? 'All Cases Passed' : ${failedTabs.length} Case(s) Failed} </h2>
+
+<TabView>
+    {(passedAll ? results : failedTabs).map((res, idx) => (
+      <TabPanel
+        key={idx}
+        header={res.label}
+        leftIcon={res.hasError ? 'pi pi-times-circle text-red-500' : 'pi pi-check-circle text-green-500'}
+      >
+        <Card className="shadow-3 border-round-xl">
+          <pre style={{ fontFamily: 'monospace' }}>
+            {res.result.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  backgroundColor: line.missing ? '#ffdddd' : '#ddffdd',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  marginBottom: '2px'
+                }}
+              >
+                {line.text}
+              </div>
+            ))}
+          </pre>
+        </Card>
+      </TabPanel>
+    ))}
+  </TabView>
+</div>
+
+); }
 
 
 
 
-<table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-  <thead>
-    <tr style="background-color: #f4f4f9; text-align: left; border-bottom: 2px solid #ccc;">
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Data Center</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Status</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Address</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Load</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Tokens</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Host ID</th>
-      <th style="padding: 10px; font-weight: bold; font-size: 14px;">Rack</th>
-    </tr>
-  </thead>
-  <tbody>
-    {tableData.length > 0 ? (
-      tableData.map((row, index) => (
-        <tr key={index} style={`background-color: ${index % 2 === 0 ? '#ffffff' : '#f9f9f9'};`}>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.dataCenter}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.status}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.address}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.load}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.tokens}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.hostId}</td>
-          <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333;">{row.rack}</td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan="7" style="text-align: center; padding: 10px;">No Data Found</td>
-      </tr>
-    )}
-  </tbody>
-</table>
 
 
 
-const parseJenkinsOutput = (output) => {
-  const lines = output.split('\n');
-  let dataCenter = '';
-  const tableData = [];
-  let parsing = false;
 
-  lines.forEach((line) => {
-    // Start parsing after "TASK [debug]"
-    if (line.includes('TASK [debug]')) {
-      parsing = true;
-    }
 
-    // Stop parsing at "PLAY RECAP"
-    if (line.includes('PLAY RECAP')) {
-      parsing = false;
-    }
 
-    if (parsing) {
-      // Extract Data Center
-      if (line.includes('"Datacenter":')) {
-        dataCenter = line.split('"Datacenter":')[1].trim().replace(/"|,|\\/g, '');
-      }
-
-      // Improved Node Information Extraction
-      // Enhanced regex pattern to handle:
-      // - Optional quotes and trailing commas
-      // - Flexible spacing
-      // - Exact matching of GB and UUID format for Host ID
-      const nodePattern = /"?(\w{2})"?\s+([\d.]+\.\d+\.\d+\.\d+)\s+([\d.]+\s+GiB)\s+(\d+)\s+\?\s+([a-fA-F0-9-]+)\s+(\w+)["|,]*$/;
-      const match = line.match(nodePattern);
-
-      if (match) {
-        const [, status, address, load, tokens, hostId, rack] = match;
-        tableData.push({
-          dataCenter,
-          status: status === 'UN' ? 'Up' : 'Down', // Mapping UN to Up, others to Down
-          address,
-          load,
-          tokens,
-          hostId,
-          rack,
-        });
-      }
-    }
-  });
-
-  return tableData;
-};
 
 const JenkinsOutputDisplay = ({ output }) => {
   const tableData = parseJenkinsOutput(output);
