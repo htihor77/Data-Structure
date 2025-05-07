@@ -1,4 +1,30 @@
+function openPopupWindow() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("popup", "true");
+  window.open(url.toString(), "_blank", "width=600,height=400");
+}
 
+
+function oldFunction() {
+  console.log("Logic running in popup mode!");
+  // You can also render differently here
+}
+
+// On page load, check for popup mode
+window.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const isPopup = params.get("popup") === "true";
+
+  if (isPopup) {
+    document.body.innerHTML = `
+      <div style="padding:20px;font-family:sans-serif;">
+        <h2>Popup Mode Interface</h2>
+        <p>This is a clean UI triggered from the same page URL.</p>
+      </div>
+    `;
+    oldFunction(); // run the original logic in this interface
+  }
+});
 
 // This is the full working code with all 7 validations included. // Using React + PrimeReact TabView to display validation status
 
