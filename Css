@@ -1,3 +1,44 @@
+
+function openCustomPopup(data) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("popup", "true");
+
+  const newWin = window.open(url.toString(), "_blank", "width=600,height=500");
+
+  // Wait for the new window to be ready and then send the data
+  const interval = setInterval(() => {
+    if (newWin && newWin.postMessage) {
+      newWin.postMessage({ type: "popup-data", payload: data }, "*");
+      clearInterval(interval);
+    }
+  }, 500);
+}
+window.addEventListener("DOMContentLoaded", () => {
+  const isPopup = new URLSearchParams(window.location.search).get("popup") === "true";
+
+  if (isPopup) {
+    document.body.innerHTML = `<div id="popup-content" style="padding:20px;font-family:sans-serif;">
+      <h2>Popup Mode</h2>
+      <pre id="data-output">Waiting for data...</pre>
+    </div>`;
+
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "popup-data") {
+        const receivedData = event.data.payload;
+        document.getElementById("data-output").innerText = JSON.stringify(receivedData, null, 2);
+        oldFunction(receivedData); // Run your original logic with the passed data
+      }
+    });
+  }
+});
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react"; import { TabView, TabPanel } from "primereact/tabview"; import { Card } from "primereact/card"; import "primereact/resources/themes/lara-light-indigo/theme.css"; import "primereact/resources/primereact.min.css";
 
 const validateDisk = (section) => { const expectedMounts = [ "/app", "/app/cassandra", "/app/cassandra/data", "/app/cassandra/commitlogs", "/app/cassandra/alertlogs", "/app/cassandra/saved_caches", ]; const failures = expectedMounts.filter((mount) => !section.some((line) => line.includes(mount)) ); return { title: "Disk Validation", success: failures.length === 0, failedLines: failures, content: section, }; };
