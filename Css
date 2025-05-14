@@ -1,3 +1,22 @@
+
+
+
+function validateRequiredItems(logLines, requiredItems) {
+  const result = requiredItems.map(item => {
+    // Check if any line includes the item
+    const found = logLines.some(line => line.includes(item));
+    return {
+      text: item,
+      missing: !found
+    };
+  });
+
+  return result;
+}
+
+
+
+
 import React from "react";
 
 // --- Highlight Logic ---
