@@ -1,3 +1,32 @@
+
+
+function validateLineFollowedByBracket(logLines, requiredLine) {
+  for (let i = 0; i < logLines.length; i++) {
+    if (logLines[i].includes(requiredLine)) {
+      const nextLine = logLines[i + 1];
+
+      const hasBracket = nextLine && nextLine.includes("]");
+      return {
+        text: hasBracket
+          ? "Validation passed"
+          : `The line after "${requiredLine}" is missing or doesn't contain a closing bracket, please validate`,
+        missing: !hasBracket
+      };
+    }
+  }
+
+  return {
+    text: `"${requiredLine}" not found in logLines`,
+    missing: true
+  };
+}
+
+
+
+
+
+
+
 function validateLinesFollowedByBracket(logLines, requiredLines) {
   const results = [];
 
