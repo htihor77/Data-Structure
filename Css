@@ -1,3 +1,55 @@
+
+import React from "react";
+
+const styles = {
+  line: {
+    padding: "10px 15px",
+    marginBottom: "8px",
+    borderRadius: "10px",
+    fontSize: "14px",
+    fontFamily: "Fira Code, monospace",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+    borderLeft: "4px solid transparent",
+    transition: "all 0.3s ease",
+  },
+  valid: {
+    backgroundColor: "#e9fbe9",
+    color: "#1b5e20",
+    borderLeftColor: "#66bb6a",
+  },
+  missing: {
+    backgroundColor: "#fff0f0",
+    color: "#b71c1c",
+    borderLeftColor: "#ef5350",
+  }
+};
+
+const ValidationResult = ({ results }) => {
+  return (
+    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
+      {results.map((res, idx) => (
+        <div
+          key={idx}
+          style={{
+            ...styles.line,
+            ...(res.missing ? styles.missing : styles.valid),
+          }}
+        >
+          {res.missing ? `Missing: ${res.text}` : res.text}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default ValidationResult;
+
+
+
+
+
+
+
 <div style={{ padding: '1rem', fontFamily: 'monospace' }}>
   <h2 style={{ color: passedAll ? 'green' : 'red' }}>
     {passedAll ? 'All Cases Passed' : `${failedTabs.length} Case(s) Failed`}
