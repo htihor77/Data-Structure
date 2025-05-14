@@ -1,5 +1,21 @@
 
+function validateLineFollowedByBracket(logLines, requiredLine) {
+  for (let i = 0; i < logLines.length; i++) {
+    if (logLines[i].includes(requiredLine)) {
+      const nextLine = logLines[i + 1];
+      const isBracket = nextLine && nextLine.trim() === "]";
+      return {
+        text: isBracket ? "Validation passed" : "The line is missing, please validate",
+        missing: !isBracket
+      };
+    }
+  }
 
+  return {
+    text: "The line is missing, please validate",
+    missing: true
+  };
+}
 
 function validateRequiredItems(logLines, requiredItems) {
   const result = requiredItems.map(item => {
