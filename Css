@@ -1,4 +1,85 @@
+import React from "react";
 
+// --- Highlight Logic ---
+const highlightMissing = (requiredLines, inputLines) => {
+  return requiredLines.map(line => ({
+    text: line,
+    missing: !inputLines.some(input => input.includes(line)),
+  }));
+};
+
+// --- Disk Validation Function ---
+const validateDisk = (lines) => {
+  const required = [
+    "/app",
+    "/cassandra/data",
+    "/cassandra/commitlog",
+    "/cassandra_logs",
+    "/cmprecon"
+  ];
+  return highlightMissing(required, lines);
+};
+
+// --- Styles ---
+const styles = {
+  wrapper: {
+    maxWidth: "600px",
+    margin: "40px auto",
+    fontFamily: "'Segoe UI', sans-serif",
+    padding: "20px",
+  },
+  line: {
+    padding: "10px 16px",
+    margin: "10px 0",
+    borderRadius: "8px",
+    fontSize: "15px",
+    fontFamily: "monospace",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.06)",
+    borderLeft: "5px solid transparent",
+    transition: "0.3s all ease",
+  },
+  valid: {
+    backgroundColor: "#e6f9f0",
+    color: "#1b5e20",
+    borderLeftColor: "#43a047",
+  },
+  missing: {
+    backgroundColor: "#fdecea",
+    color: "#b71c1c",
+    borderLeftColor: "#e53935",
+  },
+};
+
+// --- Main Component ---
+const App = () => {
+  const inputLines = [
+    "/app",
+    "/cassandra/data",
+    "/cassandra_logs",
+    // Note: "/cassandra/commitlog" and "/cmprecon" are missing
+  ];
+
+  const result = validateDisk(inputLines);
+
+  return (
+    <div style={styles.wrapper}>
+      <h2 style={{ textAlign: "center" }}>Disk Validation</h2>
+      {result.map((res, idx) => (
+        <div
+          key={idx}
+          style={{
+            ...styles.line,
+            ...(res.missing ? styles.missing : styles.valid),
+          }}
+        >
+          {res.missing ? `Missing: ${res.text}` : res.text}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default App;
 import React from "react";
 
 const styles = {
