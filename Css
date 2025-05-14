@@ -1,4 +1,57 @@
+const RackwiseMaintenance = () => {
+  const combinedResults = [
+    { title: "Disk Validation", data: result1 },
+    { title: "Info Validation", data: result2 },
+    { title: "RC.local-file Validation", data: result3 },
+    { title: "Memlock & Nofile Validation", data: result4 },
+    { title: "Datastax Recommended Parameters Validation", data: result5 },
+    { title: "System Conflict Validation", data: result6 },
+    { title: "Crontab Validation", data: result7 },
+  ];
 
+  const hasMissing = combinedResults.some(section =>
+    section.data?.some(res => res.missing)
+  );
+
+  const failedSections = combinedResults.filter(section =>
+    section.data?.some(res => res.missing)
+  );
+
+  const passedSections = combinedResults.filter(section =>
+    !section.data?.some(res => res.missing)
+  );
+
+  const finalRenderList = hasMissing
+    ? [...failedSections, ...passedSections]
+    : combinedResults;
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ textAlign: "center", color: hasMissing ? "#e53935" : "#43a047" }}>
+        {hasMissing ? "Validation Failed" : "All Validations Passed"}
+      </h1>
+
+      {finalRenderList.map((section, i) => (
+        section.data?.length > 0 && (
+          <div key={i} style={styles.wrapper}>
+            <h2 style={{ textAlign: "center" }}>{section.title}</h2>
+            {section.data.map((res, idx) => (
+              <div
+                key={idx}
+                style={{
+                  ...styles.line,
+                  ...(res.missing ? styles.missing : styles.valid),
+                }}
+              >
+                {res.missing ? `Missing: ${res.text}` : res.text}
+              </div>
+            ))}
+          </div>
+        )
+      ))}
+    </div>
+  );
+};
 
 function validateLineFollowedByBracket(logLines, requiredLine) {
   for (let i = 0; i < logLines.length; i++) {
