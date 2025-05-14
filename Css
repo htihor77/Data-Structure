@@ -1,3 +1,33 @@
+{view && finalRenderList.length > 0 && (
+  <>
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ textAlign: "center", color: hasMissing ? "#e53935" : "#43a047" }}>
+        {hasMissing ? "Validation Failed" : "All Validations Passed"}
+      </h1>
+    </div>
+
+    {finalRenderList.map((section, i) => (
+      section.data?.length > 0 && (
+        <div key={i} style={styles.wrapper}>
+          <h2 style={{ textAlign: "center" }}>{section.title}</h2>
+          {section.data.map((res, idx) => (
+            <div
+              key={idx}
+              style={{
+                ...styles.line,
+                ...(res.missing ? styles.missing : styles.valid),
+              }}
+            >
+              {res.missing ? `Missing: ${res.text}` : res.text}
+            </div>
+          ))}
+        </div>
+      )
+    ))}
+  </>
+)}
+
+
 const RackwiseMaintenance = () => {
   const combinedResults = [
     { title: "Disk Validation", data: result1 },
