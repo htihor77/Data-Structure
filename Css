@@ -1,4 +1,38 @@
+<div style={{ padding: '1rem', fontFamily: 'monospace' }}>
+  <h2 style={{ color: passedAll ? 'green' : 'red' }}>
+    {passedAll ? 'All Cases Passed' : `${failedTabs.length} Case(s) Failed`}
+  </h2>
 
+  {results.map((res, idx) => (
+    <div key={idx} style={{ marginBottom: '1.5rem' }}>
+      <h3 style={{ marginBottom: '0.5rem', color: res.hasError ? 'red' : 'green' }}>
+        {res.label} {res.hasError ? '✖ Failed' : '✔ Passed'}
+      </h3>
+
+      <div style={{
+        border: '1px solid #ccc',
+        borderRadius: '6px',
+        padding: '1rem',
+        backgroundColor: '#f9f9f9',
+      }}>
+        {res.result.map((line, i) => (
+          <div
+            key={i}
+            style={{
+              backgroundColor: line.missing ? '#ffdddd' : '#ddffdd',
+              color: '#000',
+              padding: '6px 10px',
+              marginBottom: '4px',
+              borderLeft: `6px solid ${line.missing ? '#e53935' : '#43a047'}`
+            }}
+          >
+            {line.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
 function openCustomPopup(data) {
   const url = new URL(window.location.href);
   url.searchParams.set("popup", "true");
