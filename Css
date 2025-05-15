@@ -1,3 +1,36 @@
+
+
+<div style="
+  background: linear-gradient(145deg, #e6e6e6, #ffffff);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 10px 10px 30px #d1d1d1, -10px -10px 30px #ffffff;
+  width: 80%;
+  max-width: 600px;
+  margin: 100px auto;
+  border: 1px solid #ccc;
+">
+  <h1 style="
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 16px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  ">
+    Welcome to the Dashboard
+  </h1>
+  <p style="
+    color: #555;
+    font-size: 18px;
+    margin: 0;
+  ">
+    The dashboard is currently under active development.<br>
+    Please stay tuned — an enhanced experience is coming your way shortly!
+  </p>
+</div>
+
+
 {view && finalRenderList.length > 0 && (
   <>
     <div style={{ padding: "20px" }}>
