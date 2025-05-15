@@ -1,4 +1,51 @@
+
 <div
+  style={{
+    height: '100vh',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f4f4f4',
+  }}
+>
+  <div
+    style={{
+      backgroundColor: '#fff',
+      padding: '40px 50px',
+      borderRadius: '16px',
+      boxShadow: '0 15px 40px rgba(0, 0, 0, 0.15)',
+      textAlign: 'center',
+      maxWidth: '600px',
+      width: '90%',
+    }}
+  >
+    <h1
+      style={{
+        fontSize: '28px',
+        fontWeight: '600',
+        color: '#111',
+        marginBottom: '16px',
+      }}
+    >
+      Welcome to the Dashboard
+    </h1>
+    <p
+      style={{
+        fontSize: '16px',
+        color: '#444',
+        lineHeight: '1.5',
+      }}
+    >
+      The dashboard is currently under active development.
+      <br />
+      Please stay tuned — an enhanced experience is coming your way shortly!
+    </p>
+  </div>
+</div>
+
+
+div
   style={{
     background: 'linear-gradient(145deg, #e6e6e6, #ffffff)',
     borderRadius: '16px',
