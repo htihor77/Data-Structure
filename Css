@@ -1,4 +1,38 @@
-
+<div
+  style={{
+    background: 'linear-gradient(145deg, #e6e6e6, #ffffff)',
+    borderRadius: '16px',
+    padding: '40px',
+    textAlign: 'center',
+    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+    boxShadow: '10px 30px 10px #1d1d1d, -10px -10px 30px #ffffff',
+    maxWidth: '600px',
+    margin: '100px auto',
+    border: '1px solid #ccc',
+  }}
+>
+  <h1
+    style={{
+      color: '#333',
+      fontSize: '28px',
+      marginBottom: '16px',
+      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.1)',
+    }}
+  >
+    Welcome to the Dashboard
+  </h1>
+  <p
+    style={{
+      color: '#555',
+      fontSize: '18px',
+      margin: 0,
+    }}
+  >
+    The dashboard is currently under active development.
+    <br />
+    Please stay tuned – an enhanced experience is coming your way shortly!
+  </p>
+</div>
 
 <div style="
   background: linear-gradient(145deg, #e6e6e6, #ffffff);
