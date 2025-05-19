@@ -1,3 +1,180 @@
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import './ValidationResult.css'; // We’ll define this CSS below
+
+// Replace these with your actual 7 validators
+const validateDisk = (lines) => {
+  const required = ["/app", "/cassandra/data", "/cassandra/commitlog", "/cassandra_logs"];
+  return validateRequiredItems(lines, required);
+};
+
+const validateLineFollowedByBracket = (lines) => {
+  const required = ["net.ipv4.tcp_syncookies"];
+  return validateRequiredItems(lines, required);
+};
+
+// Dummy validators for slots 3-7 (you can replace them)
+const validateSomething3 = (lines) => [];
+const validateSomething4 = (lines) => [];
+const validateSomething5 = (lines) => [];
+const validateSomething6 = (lines) => [];
+const validateSomething7 = (lines) => [];
+
+const validateFunctions = [
+  validateDisk,
+  validateLineFollowedByBracket,
+  validateSomething3,
+  validateSomething4,
+  validateSomething5,
+  validateSomething6,
+  validateSomething7,
+];
+
+// Common required item validator
+function validateRequiredItems(logLines, requiredItems) {
+  return requiredItems.map(item => {
+    const found = logLines.some(line => line.includes(item));
+    return {
+      text: item,
+      missing: !found
+    };
+  });
+}
+
+const ValidationResult = ({ ipBlocks }) => {
+  const [results, setResults] = useState({});
+
+  useEffect(() => {
+    const resultData = {};
+
+    for (const [ip, blocks] of Object.entries(ipBlocks)) {
+      const ipResult = [];
+      let ipFailed = false;
+
+      blocks.forEach((block, blockIndex) => {
+        const validations = validateFunctions.map(fn => fn(block)).flat();
+        const blockFailed = validations.some(item => item.missing);
+        if (blockFailed) ipFailed = true;
+
+        ipResult.push({
+          blockIndex,
+          validations,
+          blockFailed
+        });
+      });
+
+      resultData[ip] = { ipFailed, blocks: ipResult };
+    }
+
+    setResults(resultData);
+  }, [ipBlocks]);
+
+  return (
+    <div className="result-wrapper">
+      {Object.entries(results).map(([ip, data]) => (
+        <div
+          key={ip}
+          className={`ip-card ${data.ipFailed ? 'fail' : 'pass'}`}
+        >
+          <h3>{ip} - {data.ipFailed ? 'FAILED' : 'PASSED'}</h3>
+
+          {data.blocks.map((block, idx) => (
+            <div key={idx} className="block-section">
+              <h4>Block {block.blockIndex + 1}</h4>
+              <ul>
+                {block.validations.map((item, i) => (
+                  <li key={i} className={item.missing ? 'text-missing' : 'text-found'}>
+                    {item.text} {item.missing ? '(Missing)' : '(Present)'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default ValidationResult;
+
+
+.result-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.ip-card {
+  border: 2px solid;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: 0.3s;
+}
+
+.ip-card.pass {
+  border-color: green;
+  background-color: #e6ffe6;
+}
+
+.ip-card.fail {
+  border-color: red;
+  background-color: #ffe6e6;
+}
+
+.block-section {
+  margin-top: 1rem;
+  padding-left: 1rem;
+}
+
+.text-missing {
+  color: red;
+  font-weight: bold;
+}
+
+.text-found {
+  color: green;
+}
+
+return (
+    <div className="result-wrapper">
+      {Object.entries(results)
+        .sort(([, a], [, b]) => b.ipFailed - a.ipFailed) // sort failed IPs to top
+        .map(([ip, data]) => (
+          <div
+            key={ip}
+            className={`ip-card ${data.ipFailed ? 'fail' : 'pass'}`}
+          >
+            <h3>{ip} - {data.ipFailed ? 'FAILED' : 'PASSED'}</h3>
+
+            {data.blocks.map((block, idx) => (
+              <div key={idx} className="block-section">
+                <h4>Block {block.blockIndex + 1}</h4>
+                <ul>
+                  {block.validations.map((item, i) => (
+                    <li key={i} className={item.missing ? 'text-missing' : 'text-found'}>
+                      {item.text} {item.missing ? '(Missing)' : '(Present)'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ))}
+    </div>
+  );
+
+
+
+
+
+
+
 import React from 'react';
 
 const validateFunctions = [
