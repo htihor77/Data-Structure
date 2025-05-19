@@ -1,3 +1,10 @@
+function extractIP(line) {
+  return line.match(/\b(\d{1,3}(?:\.\d{1,3}){3})\b/); // Improved regex
+}
+
+
+
+
 const req = aggregateIPBlocks(abc); // assuming `abc` is your array of arrays
 
 // Proper logging of each IP, its block, and lines inside
