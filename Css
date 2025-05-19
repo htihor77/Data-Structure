@@ -1,3 +1,95 @@
+import React from 'react';
+
+const validateFunctions = [
+  validateDisk,
+  validateLineFollowedByBracket,
+  validateSomething3,
+  validateSomething4,
+  validateSomething5,
+  validateSomething6,
+  validateSomething7
+];
+
+// Dummy validation functions
+function validateDisk(lines) {
+  const required = ["/app", "/cassandra/data", "/cassandra/commitlog", "/cassandra_logs"];
+  return validateRequiredItems(lines, required);
+}
+
+function validateLineFollowedByBracket(lines) {
+  const required = ["net.ipv4.tcp_syncookies"];
+  return validateRequiredItems(lines, required);
+}
+
+// Define other validation functions as needed...
+function validateSomething3(lines) { return []; }
+function validateSomething4(lines) { return []; }
+function validateSomething5(lines) { return []; }
+function validateSomething6(lines) { return []; }
+function validateSomething7(lines) { return []; }
+
+function validateRequiredItems(logLines, requiredItems) {
+  return requiredItems.map(item => {
+    const found = logLines.some(line => line.includes(item));
+    return {
+      text: item,
+      missing: !found
+    };
+  });
+}
+
+export default function IPValidationResults({ ipBlocks }) {
+  const getValidationResults = (blocks) => {
+    const blockResults = blocks.map((block, blockIndex) => {
+      const results = validateFunctions.map(fn => fn(block));
+      const flat = results.flat();
+      const blockFailed = flat.some(item => item.missing);
+      return { blockIndex, results: flat, blockFailed };
+    });
+
+    const ipFailed = blockResults.some(block => block.blockFailed);
+    return { blockResults, ipFailed };
+  };
+
+  return (
+    <div>
+      {Object.entries(ipBlocks).map(([ip, blocks], ipIndex) => {
+        const { blockResults, ipFailed } = getValidationResults(blocks);
+
+        return (
+          <div key={ipIndex} style={{ margin: '1rem', border: '1px solid gray', padding: '1rem' }}>
+            <h3 style={{ color: ipFailed ? 'red' : 'green' }}>
+              IP {ip} - {ipFailed ? 'Failed' : 'Passed'}
+            </h3>
+
+            {blockResults.map(({ blockIndex, results }, bIdx) => (
+              <div key={bIdx}>
+                <h4>Block {blockIndex + 1}</h4>
+                <ul>
+                  {results.map((res, rIdx) => (
+                    <li
+                      key={rIdx}
+                      style={{ color: res.missing ? 'red' : 'green' }}
+                    >
+                      {res.text} {res.missing ? '(Missing)' : '(Present)'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+
+
+
+
+
 function extractIP(line) {
   return line.match(/\b(\d{1,3}(?:\.\d{1,3}){3})\b/); // Improved regex
 }
