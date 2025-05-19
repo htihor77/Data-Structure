@@ -1,4 +1,15 @@
+const req = aggregateIPBlocks(abc); // assuming `abc` is your array of arrays
 
+// Proper logging of each IP, its block, and lines inside
+Object.entries(req).forEach(([ip, blocks], ipIndex) => {
+  console.log(`IP ${ipIndex + 1}: ${ip}`);
+  blocks.forEach((block, blockIndex) => {
+    console.log(`  Block ${blockIndex + 1}:`);
+    block.forEach((line, lineIndex) => {
+      console.log(`    Line ${lineIndex + 1}: ${line}`);
+    });
+  });
+});
 function aggregateIPBlocks(allArrays) {
   const result = {};
 
