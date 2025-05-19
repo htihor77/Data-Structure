@@ -1,3 +1,35 @@
+
+function aggregateIPBlocks(allArrays) {
+  const result = {};
+
+  for (const array of allArrays) {
+    let currentIP = null;
+
+    for (const line of array) {
+      const match = line.match(/^ok: (\d{1,3}(?:\.\d{1,3}){3})/);
+      if (match) {
+        currentIP = match[1];
+
+        // Initialize block array for the IP if not exists
+        if (!result[currentIP]) result[currentIP] = [];
+
+        // Push a new block for this array
+        result[currentIP].push([]);
+      } else if (currentIP && line.trim()) {
+        // Push content line to the latest block for that IP
+        result[currentIP][result[currentIP].length - 1].push(line.trim());
+      }
+    }
+  }
+
+  return result;
+}
+
+
+
+
+
+
 function parseAndAggregateDebugData(debugArrays) {
   const ipDataMap = {};
 
