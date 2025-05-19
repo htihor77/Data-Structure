@@ -1,3 +1,49 @@
+function parseAndAggregateDebugData(debugArrays) {
+  const ipDataMap = {};
+
+  debugArrays.forEach((array) => {
+    let currentIP = null;
+    let currentBlock = [];
+    
+    array.forEach((line) => {
+      const ipMatch = line.match(/"ok"\s*:\s*"(\d{1,3}(?:\.\d{1,3}){3})"/);
+      
+      if (ipMatch) {
+        if (currentIP !== null) {
+          // Save current block under IP
+          if (!ipDataMap[currentIP]) {
+            ipDataMap[currentIP] = [];
+          }
+          ipDataMap[currentIP].push(currentBlock);
+        }
+
+        currentIP = ipMatch[1]; // New IP
+        currentBlock = [];
+      } else if (currentIP) {
+        currentBlock.push(line);
+      }
+    });
+
+    // Save last block
+    if (currentIP) {
+      if (!ipDataMap[currentIP]) {
+        ipDataMap[currentIP] = [];
+      }
+      ipDataMap[currentIP].push(currentBlock);
+    }
+  });
+
+  return ipDataMap;
+}
+
+
+
+
+
+
+
+
+
 
 <div
   style={{
