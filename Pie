@@ -1,4 +1,40 @@
 
+
+
+
+function convertToUIFormat(validationData) {
+  const resultData = {};
+
+  for (const [ip, blocks] of Object.entries(validationData)) {
+    let ipFailed = false;
+    const ipBlocks = [];
+
+    blocks.forEach((block, index) => {
+      const validations = block.validations || [];
+      const blockFailed = validations.some(v => v.missing);
+
+      if (blockFailed) ipFailed = true;
+
+      ipBlocks.push({
+        blockIndex: index,
+        validations,
+        blockFailed
+      });
+    });
+
+    resultData[ip] = {
+      ipFailed,
+      blocks: ipBlocks
+    };
+  }
+
+  // Sort: failed IPs first
+  const sortedResult = Object.entries(resultData).sort(
+    ([, a], [, b]) => Number(b.ipFailed) - Number(a.ipFailed)
+  );
+
+  return Object.fromEntries(sortedResult);
+}
 import React, { useState } from "react";
 import "./ValidationStyles.css"; // Make sure this file exists with CSS from below
 
