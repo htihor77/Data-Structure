@@ -1,4 +1,29 @@
+export function getFormattedValidationResults(ipBlocks, validateFunctions) {
+  return Object.entries(ipBlocks).map(([ip, blockData]) => {
+    let status = "P"; // Assume passed
+    const data = [];
 
+    for (let i = 0; i < validateFunctions.length; i++) {
+      const validateFn = validateFunctions[i];
+      const result = validateFn ? validateFn(blockData[i]) : [];
+
+      if (result.some(r => r.missing)) {
+        status = "F";
+      }
+
+      data.push({
+        ruleIndex: i,
+        result: result,
+      });
+    }
+
+    return {
+      ip,
+      status,
+      data
+    };
+  });
+}
 
 
 
