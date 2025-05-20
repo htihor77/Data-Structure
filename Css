@@ -1,3 +1,86 @@
+const [results, setResults] = useState({});
+
+function ValidationResult(ipBlocks) {
+  const resultData = {};
+
+  for (const [ip, blocks] of Object.entries(ipBlocks)) {
+    let ipFailed = false;
+    const ipResult = [];
+
+    blocks.forEach((block, blockIndex) => {
+      const validations = validateFunctions.map((fn) => fn(block)).flat();
+      const blockFailed = validations.some((item) => item.missing);
+      if (blockFailed) ipFailed = true;
+
+      ipResult.push({
+        blockIndex,
+        validations,
+        blockFailed,
+      });
+    });
+
+    resultData[ip] = {
+      ipFailed,
+      blocks: ipResult,
+    };
+  }
+
+  const sortedResult = Object.entries(resultData).sort(
+    ([, a], [, b]) => Number(b.ipFailed) - Number(a.ipFailed)
+  );
+
+  const sortedResultObj = Object.fromEntries(sortedResult);
+  setResults(sortedResultObj);
+}
+
+
+
+useEffect(() => {
+  ValidationResult(req); // or whatever your input data is
+}, [req]);
+
+
+{Object.entries(results).map(([ip, { ipFailed, blocks }]) => (
+  <div key={ip} className={`ip-wrapper ${ipFailed ? "red-box" : "green-box"}`}>
+    <h3>{ip} — {ipFailed ? "Failed" : "Passed"}</h3>
+    {blocks.map((block) => (
+      <div
+        key={block.blockIndex}
+        className={`block-wrapper ${block.blockFailed ? "red-box" : "green-box"}`}
+      >
+        <p><strong>Block {block.blockIndex + 1}:</strong></p>
+        <ul>
+          {block.validations.map((item, i) => (
+            <li key={i} style={{ color: item.missing ? "red" : "green" }}>
+              {item.text} {item.missing ? "(Missing)" : "(Found)"}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+))}
+.ip-wrapper {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.block-wrapper {
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.green-box {
+  border: 2px solid #2ecc71;
+  background-color: #eafaf1;
+}
+
+.red-box {
+  border: 2px solid #e74c3c;
+  background-color: #fdecea;
+}
 
 
 
