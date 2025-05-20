@@ -1,3 +1,43 @@
+
+
+function ValidationResult(ipBlocks) {
+  const resultData = {};
+
+  for (const [ip, blocks] of Object.entries(ipBlocks)) {
+    let ipFailed = false;
+    const ipResult = [];
+
+    blocks.forEach((block, blockIndex) => {
+      const validator = validateFunctions[blockIndex]; // Only one validator per block
+      const validations = validator ? validator(block) : [];
+
+      const blockFailed = validations.some(item => item.missing);
+      if (blockFailed) ipFailed = true;
+
+      ipResult.push({
+        blockIndex,
+        validations,
+        blockFailed,
+      });
+    });
+
+    resultData[ip] = {
+      ipFailed,
+      blocks: ipResult,
+    };
+  }
+
+  const sortedResult = Object.entries(resultData).sort(
+    ([, a], [, b]) => Number(b.ipFailed) - Number(a.ipFailed)
+  );
+
+  const sortedResultObj = Object.fromEntries(sortedResult);
+  setResults(sortedResultObj);
+}
+
+
+
+
 const [results, setResults] = useState({});
 
 function ValidationResult(ipBlocks) {
