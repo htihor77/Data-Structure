@@ -1,3 +1,151 @@
+import React, { useState } from "react";
+import './ValidationStyles.scss'; // Your CSS must be here
+
+export default function ValidationResults({ results }) {
+  const [selectedIPData, setSelectedIPData] = useState(null);
+  const [up, setup] = useState(false);
+
+  const handleViewClick = (ipData) => {
+    console.log("View clicked for:", ipData);
+    setup(true);
+    setSelectedIPData({
+      ip: ipData.ip,
+      blocks: ipData.data?.data || [], // Fallback to empty array
+    });
+  };
+
+  const closeModal = () => {
+    setSelectedIPData(null);
+    setup(false);
+  };
+
+  return (
+    <>
+      <h2>Validation Summary</h2>
+      <table className="ip-table">
+        <thead>
+          <tr>
+            <th>IP Address</th>
+            <th>Validation Status</th>
+            <th>View Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...results]
+            .sort((a, b) => (a.status === "F" ? -1 : 1)) // Failed first
+            .map((item) => (
+              <tr key={item.ip}>
+                <td>{item.ip}</td>
+                <td
+                  style={{
+                    color: item.status === "F" ? "red" : "green",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {item.status === "F" ? "Failed" : "Passed"}
+                </td>
+                <td>
+                  <button onClick={() => handleViewClick(item)}>View</button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+
+      {selectedIPData && up && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Details for IP: {selectedIPData.ip}</h3>
+            {selectedIPData.blocks.map((block, index) => {
+              const isMissing = block?.missing === true;
+              return (
+                <div
+                  key={index}
+                  className={`block-wrapper ${isMissing ? "failed" : "passed"}`}
+                >
+                  <pre>{block?.text || "No text available"}</pre>
+                  {block?.missingItems?.length > 0 && (
+                    <div className="missing-lines">
+                      <strong>Missing:</strong> {block.missingItems.join(", ")}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <button className="close-btn" onClick={closeModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+
+.modal {
+  position: fixed;
+  top: 15%;
+  left: 20%;
+  right: 20%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-content {
+  padding: 10px;
+}
+
+.block-wrapper {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  font-family: monospace;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.block-wrapper.failed {
+  background-color: #ffe5e5;
+  border-left: 5px solid red;
+}
+
+.block-wrapper.passed {
+  background-color: #e8ffe8;
+  border-left: 5px solid green;
+}
+
+.missing-lines {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.close-btn {
+  margin-top: 15px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {selectedIpData?.data?.blocks?.length > 0 ? (
   selectedIpData.data.blocks.map((block, index) => (
     <div
