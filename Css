@@ -1,4 +1,12 @@
-
+{selectedData?.blocks?.length > 0 ? (
+  selectedData.blocks.map((block, index) => (
+    <div key={index}>
+      Block {index + 1}: {block.text} - {block.missing ? 'Missing' : 'Present'}
+    </div>
+  ))
+) : (
+  <div>No data available</div>
+)}
 const handleViewClick = (ipData) => {
   console.log("View clicked for:", ipData);
 
