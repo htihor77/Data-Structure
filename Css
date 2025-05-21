@@ -1,3 +1,90 @@
+import React from "react";
+import "./ValidationResult.css"; // Assuming you create this CSS file
+
+const ValidationResult = ({ selectedIpData, setShowModal }) => {
+  const blocks = selectedIpData?.data?.blocks || [];
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h3>Details for IP: {selectedIpData?.ip || "Unknown IP"}</h3>
+        <div className="blocks-container">
+          {blocks.map((block, index) => {
+            const isFailed = block?.missingItems?.length;
+
+            return (
+              <div
+                key={index}
+                className={`block-card ${isFailed ? "failed-block" : "passed-block"}`}
+              >
+                <p><strong>Rule Index:</strong> {block?.ruleIndex ?? "N/A"}</p>
+                <p><strong>Status:</strong> {isFailed ? "Failed" : "Passed"}</p>
+                {block?.text && <p className="block-text">{block.text}</p>}
+
+                {block?.missingItems && block.missingItems.length > 0 && (
+                  <div className="missing-items">
+                    <strong>Missing:</strong>{" "}
+                    <span>{block.missingItems.join(", ")}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="button-row">
+          <button className="close-btn" onClick={() => setShowModal(false)}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ValidationResult;
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  width: 80%;
+  max-height: 90%;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.blocks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.block-card {
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.passed-block {
+  background-color: #e0f7e9;
+  border-left:
+
 
 
 function ValidationResult(ipBlocks) {
