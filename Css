@@ -1,4 +1,15 @@
+const handleViewClick = (ipData) => {
+  console.log("View clicked for:", ipData);
+  const blockData = ipData.data?.[0];
+  const blocksArray = Array.isArray(blockData)
+    ? blockData
+    : Object.values(blockData || {});
 
+  setSelectedData({
+    ip: ipData.ip,
+    blocks: blocksArray,
+  });
+};
 import "./validationStyles.acss"; // Your CSS must be here
 import { useState } from "react";
 
