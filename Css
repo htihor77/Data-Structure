@@ -1,3 +1,18 @@
+
+const handleViewClick = (ipData) => {
+  console.log("View clicked for:", ipData);
+
+  const allResults = ipData.data
+    ?.flatMap(rule => Array.isArray(rule.result) ? rule.result : [])
+    ?? [];
+
+  setSelectedData({
+    ip: ipData.ip,
+    blocks: allResults,
+  });
+};
+
+
 const handleViewClick = (ipData) => {
   console.log("View clicked for:", ipData);
 
