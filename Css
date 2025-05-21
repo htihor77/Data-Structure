@@ -1,3 +1,26 @@
+{selectedIpData?.data?.blocks?.length > 0 ? (
+  selectedIpData.data.blocks.map((block, index) => (
+    <div
+      key={index}
+      className={`block-wrapper ${block?.missingItems?.length > 0 ? "failed" : "passed"}`}
+    >
+      <p><strong>Rule Index:</strong> {block?.ruleIndex ?? "N/A"}</p>
+      <p><strong>Status:</strong> {block?.missingItems?.length > 0 ? "Failed" : "Passed"}</p>
+      {block?.text && <p className="block-text">{block.text}</p>}
+      {block?.missingItems?.length > 0 && (
+        <div className="missing-lines">
+          <strong>Missing:</strong> <span>{block.missingItems.join(", ")}</span>
+        </div>
+      )}
+    </div>
+  ))
+) : (
+  <p>No validation details available for this IP.</p>
+)}
+
+
+
+
 import React from "react";
 import "./ValidationResult.css"; // Assuming you create this CSS file
 
