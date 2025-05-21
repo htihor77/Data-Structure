@@ -1,3 +1,28 @@
+
+{results.length > 0 && (
+  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+    <h1 style={{ fontSize: "1.5rem", margin: 0 }}>Jenkins Console Button</h1>
+    <Button
+      role="link"
+      surface="light"
+      size="small"
+      onClick={consolecall}
+      disabled={display}
+      style={{
+        justifyContent: "flex-start",
+        backgroundColor: "#f0f0f0",
+        border: "1px solid #ccc",
+        padding: "6px 12px",
+        cursor: "pointer",
+      }}
+    >
+      Jenkins Console
+    </Button>
+  </div>
+)}
+
+
+
 const validationGroups = [
   { heading: 'Disk Validation', range: [0, 4] },
   { heading: 'N-Proc Validation', range: [5, 6] },
