@@ -1,3 +1,24 @@
+const validationGroups = [
+  { heading: 'Disk Validation', range: [0, 4] },
+  { heading: 'N-Proc Validation', range: [5, 6] },
+  { heading: 'RP Validation', range: [7, 14] },
+  { heading: 'Other Validation', range: [15, 53] }, // Add as many as needed
+];
+{validationGroups.map((group, gIndex) => (
+  <div key={gIndex}>
+    <h3 style={{ marginTop: '20px', color: 'blue' }}>{group.heading}</h3>
+    {selectedPotData.blocks
+      .slice(group.range[0], group.range[1] + 1)
+      .map((block, index) => (
+        <div
+          key={index}
+          className={`block-wrapper ${block.missing ? 'red-box' : 'green-box'}`}
+        >
+          {block.text} - {block.missing ? 'Missing' : 'Found'}
+        </div>
+      ))}
+  </div>
+))}
 
 
 {selectedIPData?.blocks?.length > 0 ? (
