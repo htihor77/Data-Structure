@@ -1,5 +1,24 @@
 const handleViewClick = (ipData) => {
   console.log("View clicked for:", ipData);
+
+  // Access the blocks object (ruleIndex 0, 1, 2... each having 'result')
+  const blockData = ipData.data?.[0];
+
+  // Combine all result arrays across all ruleIndices
+  const blocksArray = Object.values(blockData || {})
+    .flatMap(entry => Array.isArray(entry.result) ? entry.result : []);
+
+  setSelectedData({
+    ip: ipData.ip,
+    blocks: blocksArray,
+  });
+};
+
+
+
+
+const handleViewClick = (ipData) => {
+  console.log("View clicked for:", ipData);
   const blockData = ipData.data?.[0];
   const blocksArray = Array.isArray(blockData)
     ? blockData
