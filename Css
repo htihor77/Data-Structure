@@ -1,3 +1,31 @@
+
+
+{selectedIPData?.blocks?.length > 0 ? (
+  <>
+    <h3 className={`ip-wrapper ${selectedIPData.ipFailed ? "red-box" : "green-box"}`}>
+      {selectedIPData.ip} = {selectedIPData.ipFailed ? "Failed" : "Passed"}
+    </h3>
+
+    {selectedIPData.blocks.map((block, blockIndex) => (
+      <div
+        key={blockIndex}
+        className={`block-wrapper ${block.blockFailed ? "red-box" : "green-box"}`}
+      >
+        <p><strong>Block {blockIndex + 1}: {block.blockIndex}</strong></p>
+
+        {block.validations.map((item, i) => (
+          <div key={i} style={{ color: item.missing ? "red" : "green" }}>
+            {item.text} = {item.missing ? "(Missing)" : "(Found)"}
+          </div>
+        ))}
+      </div>
+    ))}
+  </>
+) : (
+  <div>No data available</div>
+)}
+
+
 {selectedData?.blocks?.length > 0 ? (
   selectedData.blocks.map((block, index) => (
     <div key={index}>
