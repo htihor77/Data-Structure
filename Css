@@ -1,3 +1,22 @@
+{selectedData?.blocks?.map((block, blockIndex) => (
+  <div key={blockIndex} className="block-section">
+    <h4>Block {blockIndex + 1}</h4>
+    {block?.results?.length ? (
+      block.results.map((item, itemIndex) => (
+        <div
+          key={itemIndex}
+          className={`block-wrapper ${item.missing ? "failed" : "passed"}`}
+        >
+          <span>{item.text}</span>
+        </div>
+      ))
+    ) : (
+      <p>No data available</p>
+    )}
+  </div>
+))}
+
+
 import React, { useState } from "react";
 import './ValidationStyles.scss'; // Your CSS must be here
 
