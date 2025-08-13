@@ -1,3 +1,40 @@
+4. From the JSON response, extract the following key fields exactly as they appear in the response, mapping them as follows:
+
+Description → value from key "description"
+
+Summary → value from key "summary"
+
+Comments → list all comment "body" fields from "comments" array in chronological order.
+
+Reporter → value from "reporter" → "displayName"
+
+Assignee → value from "assignee" → "displayName"
+
+Status → value from "status" → "name"
+
+Project → value from "project" → "name"
+
+Updated Date → value from "updated"
+
+Attachments → list of "filename" values from "attachment" array with corresponding "content" URLs.
+
+
+5. Format the extracted data into a detailed, human-readable report with the following structure:
+
+Issue Summary: <Summary>
+Description:
+<Description>
+
+Reporter: <Reporter>
+Assignee: <Assignee>
+Status: <Status>
+Project: <Project>
+Last Updated: <Updated Date>
+
+Comments:
+1. <First Comment Body>
+2. <Second Comment Body>
+...
 
 {results.length > 0 && (
   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
