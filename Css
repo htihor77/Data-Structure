@@ -1,3 +1,15 @@
+
+Meanwhile, in my discussion with my team yesterday, I got to know that the pivot table data needs to be processed through an automated flow. Since the SRE portal is already under heavy load, handling this manually would not only create complications but also result in double work, which isn’t efficient for the workflow.
+
+So, if the process can be fully automated and the data made available in an Oracle table, it will be very helpful. Once that’s ready, I can smoothly continue my part of the work without any delays.
+
+This way, we can avoid repeated manual effort and keep the process clean and efficient. Thank you so much for the support
+
+
+
+
+
+
 4. From the JSON response, extract the following key fields exactly as they appear in the response, mapping them as follows:
 
 Description → value from key "description"
